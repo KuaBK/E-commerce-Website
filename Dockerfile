@@ -1,20 +1,20 @@
-# Sử dụng image có JDK và Maven sẵn
-FROM maven:3.8.6-eclipse-temurin-17 AS builder
+# Base image chứa Maven 3.9.9 và JDK 21
+FROM maven:3.9.9-eclipse-temurin-21
 
-# Cài đặt thư mục làm việc
+# Thiết lập thư mục làm việc trong container
 WORKDIR /app
 
-# Sao chép toàn bộ mã nguồn vào container
+# Copy toàn bộ mã nguồn vào container
 COPY . .
 
-# Build ứng dụng
+# Build project bằng Maven
 RUN mvn clean package -DskipTests
 
-# Sử dụng image nhẹ hơn cho runtime
-FROM eclipse-temurin:17-jre AS runtime
+# Image cho runtime (không cần Maven)
+FROM eclipse-temurin:21-jre
 
-WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
+# Copy file JAR từ giai đoạn build
+COPY --from=0 /app/target/*.jar app.jar
 
-# Chạy ứng dụng
+# Lệnh chạy ứng dụng
 ENTRYPOINT ["java", "-jar", "app.jar"]
