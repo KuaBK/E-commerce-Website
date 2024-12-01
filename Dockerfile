@@ -1,20 +1,26 @@
-# Base image chứa Maven 3.9.9 và JDK 21
-FROM maven:3.9.9-eclipse-temurin-21
+# Stage 1: Build ứng dụng Spring Boot
+FROM maven:3.9.5-eclipse-temurin-21 AS builder
 
-# Thiết lập thư mục làm việc trong container
+# Set thư mục làm việc trong container
 WORKDIR /app
 
 # Copy toàn bộ mã nguồn vào container
 COPY . .
 
-# Build project bằng Maven
+# Build ứng dụng, tạo file JAR
 RUN mvn clean package -DskipTests
 
-# Image cho runtime (không cần Maven)
+# Stage 2: Runtime để chạy ứng dụng
 FROM eclipse-temurin:21-jre
 
-# Copy file JAR từ giai đoạn build
-COPY --from=0 /app/target/*.jar app.jar
+# Set thư mục làm việc trong container
+WORKDIR /app
 
-# Lệnh chạy ứng dụng
+# Copy file JAR từ stage build
+COPY --from=builder /app/target/*.jar app.jar
+
+# Expose cổng 8080 để Spring Boot lắng nghe
+EXPOSE 8080
+
+# Lệnh để khởi động ứng dụng
 ENTRYPOINT ["java", "-jar", "app.jar"]
