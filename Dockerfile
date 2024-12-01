@@ -1,15 +1,20 @@
-FROM eclipse-temurin:21-jdk AS build
+# Sử dụng image có JDK và Maven sẵn
+FROM maven:3.8.6-eclipse-temurin-17 AS builder
 
-COPY . .
-RUN mvn clean package -DskipTests
-
-
-# Run stage
-
-FROM eclipse-temurin:21-alpine
+# Cài đặt thư mục làm việc
 WORKDIR /app
 
-COPY --from=build /target/DrComputer-0.0.1-SNAPSHOT.war drcomputer.war
-EXPOSE 8080
+# Sao chép toàn bộ mã nguồn vào container
+COPY . .
 
-ENTRYPOINT ["java","-jar","drcomputer.war"]
+# Build ứng dụng
+RUN mvn clean package -DskipTests
+
+# Sử dụng image nhẹ hơn cho runtime
+FROM eclipse-temurin:17-jre AS runtime
+
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
+
+# Chạy ứng dụng
+ENTRYPOINT ["java", "-jar", "app.jar"]
