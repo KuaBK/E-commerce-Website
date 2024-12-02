@@ -3,6 +3,7 @@ package com.Phong.backend.service;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.entity.cart.Cart;
 import com.Phong.backend.entity.cart.CartItem;
+import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.entity.order.OrderDetail;
@@ -35,10 +36,11 @@ public class OrderService {
     private OrderDetailRepository orderDetailRepository;
 
     @Transactional
-    public Order createOrderFromCart(Long customerId, List<Long> cartItemIds) {
+    public Order createOrderFromCart(Long customerId, List<Long> cartItemIds, Long addressId) {
         // Lấy giỏ hàng của khách hàng
         Cart cart = cartRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Cart not found for customer"));
+
 
         // Lấy các CartItem từ cart
         List<CartItem> selectedCartItems = cartItemRepository.findAllById(cartItemIds);
@@ -46,10 +48,16 @@ public class OrderService {
             throw new RuntimeException("No items selected for order");
         }
 
+        Address deliveryAddress = cart.getCustomer().getAddresses().stream()
+                .filter(address -> address.getAddressId().equals(addressId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Delivery address not found for customer"));
+
         // Tạo đơn hàng mới từ các CartItem đã chọn
         Order order = new Order();
         order.setCustomer(cart.getCustomer());
-        order.setDeliveryAddress(cart.getCustomer().getAddress());
+        order.setShippingFee(25000.0);
+        order.setDeliveryAddress(deliveryAddress);
         order.setOrderDate(java.time.LocalDateTime.now());
         order.setStatus("PENDING");  // Trạng thái đơn hàng mới là "PENDING"
 
@@ -60,12 +68,12 @@ public class OrderService {
             orderDetail.setOrder(order);
             orderDetail.setProduct(cartItem.getProduct());
             orderDetail.setQuantity(cartItem.getQuantity());
-            orderDetail.setPrice(cartItem.getTotalPrice());
+            orderDetail.setPrice(cartItem.getProduct().getPrice());
             totalAmount += cartItem.getTotalPrice();
             order.getOrderDetails().add(orderDetail);  // Không còn lỗi NullPointerException
         }
 
-        order.setTotalAmount(totalAmount);
+        order.setTotalAmount(totalAmount + order.getShippingFee());
 
         // Lưu đơn hàng vào cơ sở dữ liệu
         order = orderRepository.save(order);

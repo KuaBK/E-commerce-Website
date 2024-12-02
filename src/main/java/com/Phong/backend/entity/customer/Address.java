@@ -1,5 +1,6 @@
 package com.Phong.backend.entity.customer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +20,7 @@ public class Address {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customerId", nullable = false)
+    @JsonIgnore
     Customer customer;
 
     String fullName;

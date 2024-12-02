@@ -33,27 +33,23 @@ public class PaymentService {
     private static final String TEMPLATE = "print";
 
     public String generatePaymentQrLink(Long orderId) {
-        // Lấy thông tin đơn hàng
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // Tổng tiền đơn hàng
         double amount = order.getTotalAmount();
 
-        // Tên sản phẩm làm nội dung thanh toán (giới hạn 25 ký tự)
         String addInfo = order.getOrderDetails().stream()
                 .map(detail -> detail.getProduct().getName())
                 .limit(25)
                 .reduce((name1, name2) -> name1 + ", " + name2)
                 .orElse("Thanh toan don hang");
 
-        // Tạo URL Quick Link
         StringBuilder quickLink = new StringBuilder("https://img.vietqr.io/image/")
                 .append(BANK_ID).append("-").append(ACCOUNT_NO).append("-").append(TEMPLATE).append(".png");
 
-        quickLink.append("?amount=").append(amount); // Tổng tiền (làm tròn về số nguyên)
-        quickLink.append("&addInfo=").append(addInfo.replace(" ", "%20")); // Nội dung thanh toán
-        quickLink.append("&accountName=").append(ACCOUNT_NAME.replace(" ", "%20")); // Tên tài khoản
+        quickLink.append("?amount=").append(amount);
+        quickLink.append("&addInfo=").append(addInfo.replace(" ", "%20"));
+        quickLink.append("&accountName=").append(ACCOUNT_NAME.replace(" ", "%20"));
 
         return quickLink.toString();
     }

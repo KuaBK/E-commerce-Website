@@ -1,5 +1,6 @@
 package com.Phong.backend.entity.order;
 
+import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.customer.Customer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -25,11 +26,17 @@ public class Order {
     private Customer customer;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderDetail> orderDetails = new ArrayList<>();;
+    private List<OrderDetail> orderDetails = new ArrayList<>();
+
+    private double shippingFee;
 
     private double totalAmount;
-    private String deliveryAddress;
+
     private LocalDateTime orderDate;
     private LocalDateTime deliveryDate;
     private String status;
+
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address deliveryAddress;
 }

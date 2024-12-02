@@ -23,8 +23,11 @@ public class OrderController {
     private OrderService orderService;
 
         @PostMapping("/createOrder")
-        public ApiResponse<Order> createOrder(@RequestParam Long customerId, @RequestBody List<Long> cartItemIds) {
-            Order order = orderService.createOrderFromCart(customerId, cartItemIds);
+        public ApiResponse<Order> createOrder(
+                @RequestParam Long customerId,
+                @RequestParam Long addressId,
+                @RequestBody List<Long> cartItemIds) {
+            Order order = orderService.createOrderFromCart(customerId, cartItemIds, addressId);
             return ApiResponse.<Order>builder()
                     .message("Order created successfully")
                     .result(order)

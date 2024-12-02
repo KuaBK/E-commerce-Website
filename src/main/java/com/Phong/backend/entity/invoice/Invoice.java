@@ -1,5 +1,6 @@
 package com.Phong.backend.entity.invoice;
 
+import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.employee.Seller;
 import com.Phong.backend.entity.order.Order;
 import jakarta.persistence.*;
@@ -17,12 +18,11 @@ public class Invoice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long invoiceId;
 
-    @ManyToOne
-    @JoinColumn(name = "employee_id", nullable = false)
-    private Seller seller;
-
     private LocalDateTime issuedDate;
-    private String deliveryAddress;
+
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address deliveryAddress;
 
     @ManyToOne
     private Order order;
@@ -38,9 +38,5 @@ public class Invoice {
 
     private LocalDateTime createdAt;
     private double shippingFee;
-    private boolean paymentStatus;
     private double totalAmount;
-
-    @OneToOne
-    private Payment payments;
 }
