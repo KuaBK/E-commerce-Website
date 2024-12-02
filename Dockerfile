@@ -1,26 +1,20 @@
-# Stage 1: Build ứng dụng Spring Boot
-FROM maven:3.9.5-eclipse-temurin-21 AS builder
+FROM maven:3.9.8-amazoncorretto-21 AS build
 
-# Set thư mục làm việc trong container
+# Copy source code and pom.xml file to /app folder
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
 
-# Copy toàn bộ mã nguồn vào container
-COPY . .
+# Build source code with maven
+RUN mvn package -DskipTests
 
-# Build ứng dụng, tạo file JAR
-RUN mvn clean package -DskipTests
+#Stage 2: create image
+# Start with Amazon Correto JDK 21
+FROM amazoncorretto:21.0.4
 
-# Stage 2: Runtime để chạy ứng dụng
-FROM eclipse-temurin:21-jre
-
-# Set thư mục làm việc trong container
+# Set working folder to App and copy complied file from above step
 WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 
-# Copy file JAR từ stage build
-COPY --from=builder /app/target/*.jar app.jar
-
-# Expose cổng 8080 để Spring Boot lắng nghe
-EXPOSE 8080
-
-# Lệnh để khởi động ứng dụng
+# Command to run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
