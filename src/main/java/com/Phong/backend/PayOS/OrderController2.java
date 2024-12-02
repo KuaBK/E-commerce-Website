@@ -2,14 +2,16 @@ package com.Phong.backend.PayOS;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.Phong.backend.entity.invoice.Payment;
+import com.Phong.backend.entity.order.Order;
+import com.Phong.backend.entity.order.OrderDetail;
+import com.Phong.backend.repository.OrderRepository;
+import com.Phong.backend.repository.PaymentRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -25,33 +27,109 @@ import vn.payos.type.PaymentLinkData;
 public class OrderController2 {
     private final PayOS payOS;
 
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     public OrderController2(PayOS payOS) {
         super();
         this.payOS = payOS;
     }
 
+    public void savePayment(ObjectNode response) {
+        try {
+            // Lấy dữ liệu từ response
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode data = response.get("data");
+
+            String id = data.get("id").asText();
+            Optional<Payment> existingPayment = paymentRepository.findById(id);
+
+            if (existingPayment.isPresent()) {
+                // Nếu thanh toán đã tồn tại, cập nhật thông tin
+                Payment payment = existingPayment.get();
+                payment.setStatus(data.get("status").asText());
+                payment.setAmountRemaining(data.get("amountRemaining").asDouble());
+
+                // Nếu cần, cập nhật thêm các cột khác
+                paymentRepository.save(payment);
+                System.out.println("Cập nhật thông tin thanh toán với ID " + id + " thành công.");
+            } else {
+                // Nếu thanh toán chưa tồn tại, tạo mới
+                Payment payment = new Payment();
+                payment.setId(id);
+                payment.setOrderCode(data.get("orderCode").asLong());
+                payment.setAmount(data.get("amount").asDouble());
+                payment.setAmountRemaining(data.get("amountRemaining").asDouble());
+                payment.setStatus(data.get("status").asText());
+                payment.setCreatedAt(mapper.convertValue(data.get("createdAt"), Date.class));
+
+                paymentRepository.save(payment);
+
+                System.out.println("Thông tin thanh toán đã được lưu thành công.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
     @PostMapping(path = "/create")
-    public ObjectNode createPaymentLink(@RequestBody CreatePaymentLinkRequestBody RequestBody) {
+    public ObjectNode createPaymentLink(@RequestParam Long orderId) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
         try {
-            final String productName = RequestBody.getProductName();
-            final String description = RequestBody.getDescription();
+            // Lấy thông tin order dựa vào orderId
+            Optional<Order> optionalOrder = orderRepository.findById(orderId);
+            if (!optionalOrder.isPresent()) {
+                response.put("error", -1);
+                response.put("message", "Order not found");
+                return response;
+            }
+
+            Order order = optionalOrder.get();
+
+            // Lấy thông tin sản phẩm từ OrderDetails
+            StringBuilder productNames = new StringBuilder();
+            double totalAmount = 0;
+            for (OrderDetail detail : order.getOrderDetails()) {
+                productNames.append(detail.getProduct().getName()).append(", ");
+                totalAmount += detail.getQuantity() * detail.getPrice();
+            }
+
+            // Cắt bỏ dấu phẩy cuối cùng trong chuỗi tên sản phẩm
+            if (productNames.length() > 0) {
+                productNames.setLength(productNames.length() - 2);
+            }
+
             final String returnUrl = "http://localhost:8080/success";
             final String cancelUrl = "http://localhost:8080/cancel";
-            final int price = RequestBody.getPrice();
-            // Gen order code
-            String currentTimeString = String.valueOf(String.valueOf(new Date().getTime()));
-            long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
 
-            ItemData item = ItemData.builder().name(productName).price(price).quantity(1).build();
+            // Tạo đối tượng ItemData
+            ItemData item = ItemData.builder()
+                    .name(productNames.toString())
+                    .price((int) totalAmount)
+                    .quantity(1)
+                    .build();
 
-            PaymentData paymentData = PaymentData.builder().orderCode(orderCode).description(description).amount(price)
-                    .item(item).returnUrl(returnUrl).cancelUrl(cancelUrl).build();
+            // Tạo đối tượng PaymentData
+            PaymentData paymentData = PaymentData.builder()
+                    .orderCode(orderId)
+                    .description("Payment for Order #" + orderId)
+                    .amount((int) totalAmount)
+                    .item(item)
+                    .returnUrl(returnUrl)
+                    .cancelUrl(cancelUrl)
+                    .build();
 
+            // Gọi API tạo liên kết thanh toán
             CheckoutResponseData data = payOS.createPaymentLink(paymentData);
 
-            response.put("error", 0);
+            // Trả về phản hồi thành công
+            response.put("code", 1000);
             response.put("message", "success");
             response.set("data", objectMapper.valueToTree(data));
             return response;
@@ -62,7 +140,6 @@ public class OrderController2 {
             response.put("message", "fail");
             response.set("data", null);
             return response;
-
         }
     }
 
@@ -77,6 +154,8 @@ public class OrderController2 {
             response.set("data", objectMapper.valueToTree(order));
             response.put("error", 0);
             response.put("message", "ok");
+
+            savePayment(response);
             return response;
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,7 +164,6 @@ public class OrderController2 {
             response.set("data", null);
             return response;
         }
-
     }
 
     @PutMapping(path = "/{orderId}")

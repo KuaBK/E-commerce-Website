@@ -2,11 +2,13 @@ package com.Phong.backend.entity.invoice;
 
 import com.Phong.backend.entity.employee.Seller;
 import com.Phong.backend.entity.order.Order;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -15,18 +17,17 @@ import java.util.List;
 @AllArgsConstructor
 public class Payment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @OneToOne
-    @JsonIgnore
-    private Invoice invoice; // Liên kết với hóa đơn
+    private long orderCode;
+    private double amount;
+    private double amountRemaining;
 
-    private Long amountPaid;
-    private LocalDateTime paymentDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm - dd/mm/yyyy")
+    private Date createdAt;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus; // Trạng thái thanh toán (SUCCESS, FAILED, PENDING)
+
+    private String status;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod; // Phương thức thanh toán (COD, CARD, PAYPAL)
