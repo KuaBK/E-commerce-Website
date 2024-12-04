@@ -21,4 +21,7 @@ public class Loyalty {
 
     private int points;
     private int accumulationNumber;
+
+    @Column(name = "CreateAt")
+    private LocalDate CreateAt;
 }

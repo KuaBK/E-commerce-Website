@@ -30,7 +30,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<InvoiceResponse>> getInvoiceById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<InvoiceResponse>> getInvoiceById(@PathVariable String id) {
         InvoiceResponse response = invoiceService.getInvoiceById(id);
         return ResponseEntity.ok(ApiResponse.<InvoiceResponse>builder()
                 .message("Invoice retrieved successfully")
@@ -48,19 +48,20 @@ public class InvoiceController {
     }
 
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<ApiResponse<Void>> cancelInvoice(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> cancelInvoice(@PathVariable String id) {
         invoiceService.cancelInvoice(id);
         return ResponseEntity.ok(ApiResponse.<Void>builder()
                 .message("Invoice cancelled successfully")
                 .build());
     }
 
-    @GetMapping("/details/{invoiceId}")
-    public ResponseEntity<ApiResponse<List<InvoiceDetailResponse>>> getInvoiceDetails(@PathVariable Long invoiceId) {
-        List<InvoiceDetailResponse> response = invoiceService.getInvoiceDetails(invoiceId);
-        return ResponseEntity.ok(ApiResponse.<List<InvoiceDetailResponse>>builder()
-                .message("Invoice details retrieved successfully")
-                .result(response)
-                .build());
+    @GetMapping("/{invoiceId}/details")
+    public ApiResponse<List<InvoiceDetailResponse>> getInvoiceDetails(@PathVariable String invoiceId) {
+        List<InvoiceDetailResponse> invoiceDetails = invoiceService.getInvoiceDetailsByInvoiceId(invoiceId);
+        return ApiResponse.<List<InvoiceDetailResponse>>builder()
+                .code(1000)  // Mã trạng thái (có thể thay đổi theo yêu cầu)
+                .message("Successfully retrieved invoice details")
+                .result(invoiceDetails)
+                .build();
     }
 }

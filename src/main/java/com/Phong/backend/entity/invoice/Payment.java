@@ -23,12 +23,8 @@ public class Payment {
     private double amount;
     private double amountRemaining;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm - dd/mm/yyyy")
     private Date createdAt;
-
 
     private String status;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod; // Phương thức thanh toán (COD, CARD, PAYPAL)
 }

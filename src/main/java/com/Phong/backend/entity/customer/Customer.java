@@ -4,6 +4,7 @@ import com.Phong.backend.entity.account.Account;
 import com.Phong.backend.entity.cart.Cart;
 import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.entity.Gender;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -71,6 +72,7 @@ public class Customer {
     private List<Order> orders;
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Loyalty loyalty;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)

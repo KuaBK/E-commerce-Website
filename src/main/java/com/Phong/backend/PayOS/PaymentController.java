@@ -1,14 +1,14 @@
 package com.Phong.backend.PayOS;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import com.Phong.backend.entity.invoice.Payment;
+import com.Phong.backend.entity.invoice.*;
 import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.entity.order.OrderDetail;
-import com.Phong.backend.repository.OrderRepository;
-import com.Phong.backend.repository.PaymentRepository;
+import com.Phong.backend.repository.*;
+import com.Phong.backend.service.InvoiceProcessingService;
+import com.Phong.backend.service.LoyaltyService;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,7 @@ import vn.payos.type.PaymentLinkData;
 
 @RestController
 @RequestMapping("/order")
-public class OrderController2 {
+public class PaymentController {
     private final PayOS payOS;
 
     @Autowired
@@ -33,7 +33,22 @@ public class OrderController2 {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    public OrderController2(PayOS payOS) {
+    @Autowired
+    private InvoiceDetailRepository invoiceDetailRepository;
+
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+
+    @Autowired
+    private InvoiceProcessingService invoiceProcessingService;
+
+    @Autowired
+    private OrderDetailRepository orderDetailRepository;
+
+    @Autowired
+    private LoyaltyService loyaltyService;
+
+    public PaymentController(PayOS payOS) {
         super();
         this.payOS = payOS;
     }
@@ -75,6 +90,49 @@ public class OrderController2 {
         }
     }
 
+    public void saveInvoice(ObjectNode response) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode data = response.get("data");
+
+            Invoice invoice = new Invoice();
+            invoice.setShippingFee(25000.0);
+            invoice.setTotalAmount(data.get("amount").asDouble());
+            invoice.setStatus(InvoiceStatus.valueOf(data.get("status").asText()));
+            invoice.setPaymentMethod(PaymentMethod.BANK);
+            invoice.setCreatedAt(mapper.convertValue(data.get("createdAt"), Date.class));
+
+            Long orderCode = data.get("orderCode").asLong();
+
+            Order order = orderRepository.findById(orderCode).orElse(null);
+            invoice.setDeliveryAddress(order.getDeliveryAddress());
+            invoice.setOrder(order);
+            invoice.setCustomer(order.getCustomer());
+            invoice.setTotalPrice(order.getTotalPrice());
+
+            invoiceRepository.save(invoice);
+
+            Invoice savedInvoice = invoiceRepository.save(invoice);
+            List<InvoiceDetail> invoiceDetails = order.getOrderDetails().stream().map(orderDetail -> {
+                InvoiceDetail detail = new InvoiceDetail();
+                detail.setInvoice(savedInvoice);
+                detail.setProduct(orderDetail.getProduct());
+                detail.setQuantity(orderDetail.getQuantity());
+                detail.setUnitPrice(orderDetail.getPrice());
+                detail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
+                return detail;
+            }).collect(Collectors.toList());
+
+            invoiceDetailRepository.saveAll(invoiceDetails);
+
+            System.out.println("Thông tin hóa đơn đã được lưu thành công.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 
     @PostMapping(path = "/create")
@@ -94,10 +152,12 @@ public class OrderController2 {
 
             // Lấy thông tin sản phẩm từ OrderDetails
             StringBuilder productNames = new StringBuilder();
+            int totalQuantity = 0;
             double totalAmount = 0;
             for (OrderDetail detail : order.getOrderDetails()) {
                 productNames.append(detail.getProduct().getName()).append(", ");
                 totalAmount += detail.getQuantity() * detail.getPrice();
+                totalQuantity += detail.getQuantity();
             }
 
             // Cắt bỏ dấu phẩy cuối cùng trong chuỗi tên sản phẩm
@@ -111,15 +171,15 @@ public class OrderController2 {
             // Tạo đối tượng ItemData
             ItemData item = ItemData.builder()
                     .name(productNames.toString())
-                    .price((int) totalAmount)
-                    .quantity(1)
+                    .price((int)(totalAmount + order.getShippingFee()))
+                    .quantity(totalQuantity)
                     .build();
 
             // Tạo đối tượng PaymentData
             PaymentData paymentData = PaymentData.builder()
                     .orderCode(orderId)
                     .description("Payment for Order #" + orderId)
-                    .amount((int) totalAmount)
+                    .amount((int) totalAmount + (int)order.getShippingFee())
                     .item(item)
                     .returnUrl(returnUrl)
                     .cancelUrl(cancelUrl)
@@ -156,7 +216,29 @@ public class OrderController2 {
             response.put("message", "ok");
 
             savePayment(response);
+
+            JsonNode data = response.get("data");
+            if(data.get("status").asText().equals("PAID")){
+                saveInvoice(response);
+                Invoice invoice = invoiceRepository.findByOrder_OrderId(orderId).orElse(null);
+                Order newOrder = orderRepository.findById(orderId).orElse(null);
+                String email = newOrder.getCustomer().getEmail();
+                try {
+                    invoiceProcessingService.processInvoice(invoice, email);
+                } catch (Exception e) {
+                    System.err.println("Error processing invoice: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                List<OrderDetail> details = orderDetailRepository.findByOrderOrderId(orderId);
+                for (OrderDetail detail : details) {
+                    detail.getProduct().setQuantitySold(detail.getQuantity());
+                    detail.getProduct().setStockQuantity(detail.getProduct().getStockQuantity() - detail.getQuantity());
+                }
+                loyaltyService.addPoints(invoice.getCustomer().getCustomerId(), invoice.getTotalAmount());
+            }
+
             return response;
+
         } catch (Exception e) {
             e.printStackTrace();
             response.put("error", -1);

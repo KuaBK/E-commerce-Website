@@ -4,12 +4,15 @@ import com.Phong.backend.dto.request.customer.CustomerCreationRequest;
 import com.Phong.backend.dto.request.customer.CustomerUpdateRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.customer.CustomerResponse;
+import com.Phong.backend.entity.customer.Avatar;
 import com.Phong.backend.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -44,6 +47,16 @@ public class CustomerController {
     @DeleteMapping("/{customerId}")
     public ResponseEntity<ApiResponse<Void>> deleteCustomer(@PathVariable Long customerId) {
         return ResponseEntity.ok(customerService.deleteCustomer(customerId));
+    }
+
+    @PostMapping("/avatar/{customerId}")
+    public ResponseEntity<ApiResponse<Avatar>> updateAvatar(
+            @PathVariable Long customerId,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        Avatar avatar = customerService.updateAvatar(customerId, file);
+        return ResponseEntity.ok(ApiResponse.<Avatar>builder()
+                .message("Avatar updated successfully")
+                .build());
     }
 }
 

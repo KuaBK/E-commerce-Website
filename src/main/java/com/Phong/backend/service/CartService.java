@@ -55,7 +55,7 @@ public class CartService {
         Product product = productOpt.get();
 
         // Lấy giỏ hàng của khách hàng
-        Optional<Cart> cartOpt = cartRepository.findByCustomer(customer);
+        Optional<Cart> cartOpt = cartRepository.findByCustomer_CustomerId(customer.getCustomerId());
         Cart cart;
         if (cartOpt.isPresent()) {
             cart = cartOpt.get();

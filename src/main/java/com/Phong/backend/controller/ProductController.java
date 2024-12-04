@@ -4,10 +4,14 @@ import com.Phong.backend.dto.request.product.ProductRequest;
 import com.Phong.backend.dto.request.product.ProductUpdateRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.product.ProductResponse;
+import com.Phong.backend.entity.product.Product;
 import com.Phong.backend.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -62,5 +66,15 @@ public class ProductController {
     @GetMapping("/search")
     public ApiResponse<List<ProductResponse>> searchProducts(@RequestParam String keyword) {
         return productService.searchProducts(keyword);
+    }
+
+    @PostMapping("/{productId}/images")
+    public ResponseEntity<ApiResponse<Product>> addProductImage(
+            @PathVariable Long productId,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        Product product = productService.addProductImage(productId, file);
+        return ResponseEntity.ok(ApiResponse.<Product>builder()
+                .message("Product image uploaded successfully")
+                .build());
     }
 }

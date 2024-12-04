@@ -1,7 +1,6 @@
 package com.Phong.backend.entity.product;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
@@ -17,7 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "promotions")
-public class Promotion {
+public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long promotionId; // Mã khuyến mãi

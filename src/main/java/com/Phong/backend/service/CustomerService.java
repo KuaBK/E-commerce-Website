@@ -7,13 +7,17 @@ import com.Phong.backend.dto.response.customer.CustomerResponse;
 import com.Phong.backend.entity.account.Account;
 import com.Phong.backend.entity.cart.Cart;
 import com.Phong.backend.entity.customer.Customer;
-import com.Phong.backend.repository.AccountRepository;
-import com.Phong.backend.repository.CartRepository;
-import com.Phong.backend.repository.CustomerRepository;
+import com.Phong.backend.entity.customer.Avatar;
+import com.Phong.backend.entity.customer.Loyalty;
+import com.Phong.backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +27,10 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final AccountRepository accountRepository;
     private final CartRepository cartRepository;
+    private final CloudinaryService cloudinaryService;
+    private final AvatarRepository avatarRepository;
+    private final LoyaltyRepository loyaltyRepository;
+
 
 
     /**
@@ -46,6 +54,16 @@ public class CustomerService {
                 .build();
 
         customer = customerRepository.save(customer);
+
+        Loyalty loyalty = Loyalty.builder()
+                .customer(customer)
+                .points(0)
+                .accumulationNumber(0)
+                .CreateAt(LocalDate.now())
+                .build();
+
+        loyaltyRepository.save(loyalty);
+        customer.setLoyalty(loyalty);
 
         Cart cart = new Cart();
         cart.setCustomer(customer);
@@ -143,5 +161,25 @@ public class CustomerService {
                 .avatar(customer.getAvatar())
                 .build();
     }
+
+    public Avatar updateAvatar(Long customerId, MultipartFile file) throws IOException {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        Map uploadResult = cloudinaryService.uploadImage(file);
+        String url = (String) uploadResult.get("url");
+        String cloudinaryId = (String) uploadResult.get("public_id");
+
+        Avatar avatar = Avatar.builder()
+                .name(file.getOriginalFilename())
+                .url(url)
+                .cloudinaryId(cloudinaryId)
+                .data(file.getBytes())
+                .uploadedBy(customer)
+                .build();
+
+        return avatarRepository.save(avatar);
+    }
+
 }
 

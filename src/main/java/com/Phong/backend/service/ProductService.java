@@ -6,18 +6,26 @@ import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.product.ProductResponse;
 import com.Phong.backend.entity.product.Product;
 import com.Phong.backend.entity.product.Category;
+import com.Phong.backend.entity.product.ProductImage;
 import com.Phong.backend.repository.ProductRepository;
 import com.Phong.backend.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service
 public class ProductService {
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     @Autowired
     private ProductRepository productRepository;
@@ -81,9 +89,9 @@ public class ProductService {
             if (productUpdateRequest.getDescription() != null) updatedProduct.setDescription(productUpdateRequest.getDescription());
             if (productUpdateRequest.getPrice() != null) updatedProduct.setPrice(productUpdateRequest.getPrice());
             if (productUpdateRequest.getOrigin() != null) updatedProduct.setOrigin(productUpdateRequest.getOrigin());
+            if (productUpdateRequest.getImages() != null) updatedProduct.setImages(productUpdateRequest.getImages());
             if (productUpdateRequest.getVersion() != null) updatedProduct.setVersion(productUpdateRequest.getVersion());
             if (productUpdateRequest.getEvaluate() != null) updatedProduct.setEvaluate(productUpdateRequest.getEvaluate());
-            if (productUpdateRequest.getImages() != null) updatedProduct.setImages(productUpdateRequest.getImages());
             if (productUpdateRequest.getStockQuantity() != null) updatedProduct.setStockQuantity(productUpdateRequest.getStockQuantity());
 
             // Kiểm tra và cập nhật Category nếu categoryId có giá trị
@@ -285,6 +293,25 @@ public class ProductService {
                 .build();
     }
 
+    public Product addProductImage(Long productId, MultipartFile file) throws IOException {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Upload ảnh lên Cloudinary
+        Map uploadResult = cloudinaryService.uploadImage(file);
+        String url = (String) uploadResult.get("url");
+        String cloudinaryId = (String) uploadResult.get("public_id");
+
+        // Lưu thông tin ảnh vào database
+        ProductImage image = ProductImage.builder()
+                .url(url)
+                .cloudinaryId(cloudinaryId)
+                .build();
+
+        product.getImages().add(image);
+        return productRepository.save(product);
+    }
+
     // Helper method to map Product to ProductResponse
     public ProductResponse mapToProductResponse(Product product) {
         return ProductResponse.builder()
@@ -295,7 +322,6 @@ public class ProductService {
                 .origin(product.getOrigin())
                 .version(product.getVersion())
                 .evaluate(product.getEvaluate())
-                .images(product.getImages())
                 .stockQuantity(product.getStockQuantity())
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : "Unknown")
                 .build();

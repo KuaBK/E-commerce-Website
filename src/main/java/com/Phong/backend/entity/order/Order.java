@@ -28,8 +28,8 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
+    private double totalPrice;
     private double shippingFee;
-
     private double totalAmount;
 
     private LocalDateTime orderDate;

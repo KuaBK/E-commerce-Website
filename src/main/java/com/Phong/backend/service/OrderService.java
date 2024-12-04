@@ -7,7 +7,6 @@ import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.entity.order.OrderDetail;
-import com.Phong.backend.exception.AppException;
 import com.Phong.backend.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +37,7 @@ public class OrderService {
     @Transactional
     public Order createOrderFromCart(Long customerId, List<Long> cartItemIds, Long addressId) {
         // Lấy giỏ hàng của khách hàng
-        Cart cart = cartRepository.findById(customerId)
+        Cart cart = cartRepository.findByCustomer_CustomerId(customerId)
                 .orElseThrow(() -> new RuntimeException("Cart not found for customer"));
 
 
@@ -73,6 +72,7 @@ public class OrderService {
             order.getOrderDetails().add(orderDetail);  // Không còn lỗi NullPointerException
         }
 
+        order.setTotalPrice(totalAmount);
         order.setTotalAmount(totalAmount + order.getShippingFee());
 
         // Lưu đơn hàng vào cơ sở dữ liệu
