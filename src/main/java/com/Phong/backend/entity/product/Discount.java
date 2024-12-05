@@ -15,11 +15,11 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "promotions")
+@Table(name = "discount")
 public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long promotionId; // Mã khuyến mãi
+    private Long discountId; // Mã khuyến mãi
 
     private String name; // Tên khuyến mãi
 
@@ -33,8 +33,8 @@ public class Discount {
 
     @ManyToMany
     @JoinTable(
-            name = "promotion_products",
-            joinColumns = @JoinColumn(name = "promotion_id"),
+            name = "discount_products",
+            joinColumns = @JoinColumn(name = "discount_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
     private Set<Product> products = new HashSet<>(); // Các sản phẩm được áp dụng khuyến mãi
