@@ -10,7 +10,7 @@ import java.util.List;
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
 
     // Tìm tất cả OrderDetails theo orderId
-    List<OrderDetail> findByOrderOrderId(Long orderId);
+    List<OrderDetail> findByOrderOrderId(String orderId);
 
     // Tìm tất cả OrderDetails theo productId (nếu cần thiết)
     List<OrderDetail> findByProductProductId(Long productId);

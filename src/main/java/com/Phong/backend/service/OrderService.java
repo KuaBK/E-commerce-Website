@@ -109,7 +109,7 @@ public class OrderService {
                 .build();
     }
 
-    public ApiResponse<Order> getOrderDetails(Long orderId) {
+    public ApiResponse<Order> getOrderDetails(String orderId) {
         Optional<Order> orderOpt = orderRepository.findById(orderId);
         if (!orderOpt.isPresent()) {
             return ApiResponse.<Order>builder()
@@ -125,7 +125,7 @@ public class OrderService {
                 .build();
     }
 
-    public ApiResponse<Void> cancelOrder(Long orderId) {
+    public ApiResponse<Void> cancelOrder(String orderId) {
         Optional<Order> orderOpt = orderRepository.findById(orderId);
         if (!orderOpt.isPresent()) {
             return ApiResponse.<Void>builder()

@@ -40,7 +40,7 @@ public class SecurityConfig {
 
         "/invoice", "/invoice/{id}", "/invoice/{id}/cancel", "/invoice/{invoiceId}/details",
 
-        "/payment/create", "/payment/{orderId}",
+        "/payment/create", "/payment",
 
         "/images/upload"
 
