@@ -1,7 +1,7 @@
 package com.Phong.backend.service;
 
 import com.Phong.backend.dto.request.customer.AddressRequest;
-import com.Phong.backend.dto.response.AddressResponse;
+import com.Phong.backend.dto.response.customer.AddressResponse;
 import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.repository.AddressRepository;

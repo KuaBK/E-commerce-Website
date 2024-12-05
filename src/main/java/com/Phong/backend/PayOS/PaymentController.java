@@ -23,7 +23,7 @@ import vn.payos.type.PaymentData;
 import vn.payos.type.PaymentLinkData;
 
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/payment")
 public class PaymentController {
     private final PayOS payOS;
 

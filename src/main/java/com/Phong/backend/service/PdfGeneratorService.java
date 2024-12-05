@@ -5,7 +5,6 @@ import com.Phong.backend.entity.invoice.InvoiceDetail;
 import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.product.Product;
 import com.Phong.backend.repository.InvoiceDetailRepository;
-import com.Phong.backend.repository.InvoiceRepository;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;

@@ -1,13 +1,11 @@
 package com.Phong.backend.controller;
 
 import com.Phong.backend.dto.request.customer.AddressRequest;
-import com.Phong.backend.dto.response.AddressResponse;
+import com.Phong.backend.dto.response.customer.AddressResponse;
 import com.Phong.backend.dto.response.ApiResponse;
-import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.repository.CustomerRepository;
 import com.Phong.backend.service.AddressService;
-import com.Phong.backend.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

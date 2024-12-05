@@ -1,4 +1,4 @@
-package com.Phong.backend.dto.response;
+package com.Phong.backend.dto.response.customer;
 
 import lombok.Builder;
 import lombok.Data;

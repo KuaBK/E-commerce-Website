@@ -3,8 +3,6 @@ package com.Phong.backend.service;
 import com.Phong.backend.dto.request.product.CategoryRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.product.CategoryResponse;
-import com.Phong.backend.dto.response.product.ProductResponse;
-import com.Phong.backend.service.ProductService;
 import com.Phong.backend.entity.product.Category;
 import com.Phong.backend.repository.CategoryRepository;
 import jakarta.transaction.Transactional;

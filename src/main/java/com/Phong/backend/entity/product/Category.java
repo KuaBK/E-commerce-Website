@@ -1,6 +1,5 @@
 package com.Phong.backend.entity.product;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
