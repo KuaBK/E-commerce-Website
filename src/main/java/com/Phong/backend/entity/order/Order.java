@@ -17,8 +17,8 @@ import java.util.List;
 @Table(name = "orders")
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String orderId;
 
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)

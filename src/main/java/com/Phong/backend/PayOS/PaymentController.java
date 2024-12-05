@@ -90,7 +90,7 @@ public class PaymentController {
         }
     }
 
-    public void saveInvoice(ObjectNode response) {
+    public void saveInvoice(ObjectNode response, String orderId) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode data = response.get("data");
@@ -102,9 +102,8 @@ public class PaymentController {
             invoice.setPaymentMethod(PaymentMethod.BANK);
             invoice.setCreatedAt(mapper.convertValue(data.get("createdAt"), Date.class));
 
-            Long orderCode = data.get("orderCode").asLong();
 
-            Order order = orderRepository.findById(orderCode).orElse(null);
+            Order order = orderRepository.findById(orderId).orElse(null);
             invoice.setDeliveryAddress(order.getDeliveryAddress());
             invoice.setOrder(order);
             invoice.setCustomer(order.getCustomer());
@@ -136,7 +135,7 @@ public class PaymentController {
 
 
     @PostMapping(path = "/create")
-    public ObjectNode createPaymentLink(@RequestParam Long orderId) {
+    public ObjectNode createPaymentLink(@RequestParam String orderId) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
         try {
@@ -175,10 +174,12 @@ public class PaymentController {
                     .quantity(totalQuantity)
                     .build();
 
-            // Tạo đối tượng PaymentData
+            String currentTimeString = String.valueOf(String.valueOf(new Date().getTime()));
+            long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
+
             PaymentData paymentData = PaymentData.builder()
-                    .orderCode(orderId)
-                    .description("Payment for Order #" + orderId)
+                    .orderCode(orderCode)
+                    .description("OrderCode# " + orderCode)
                     .amount((int) totalAmount + (int)order.getShippingFee())
                     .item(item)
                     .returnUrl(returnUrl)
@@ -203,13 +204,13 @@ public class PaymentController {
         }
     }
 
-    @GetMapping(path = "/{orderId}")
-    public ObjectNode getOrderById(@PathVariable("orderId") long orderId) {
+    @GetMapping
+    public ObjectNode getOrderById(@RequestParam Long orderCode, @RequestParam String orderId) {
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode response = objectMapper.createObjectNode();
 
         try {
-            PaymentLinkData order = payOS.getPaymentLinkInformation(orderId);
+            PaymentLinkData order = payOS.getPaymentLinkInformation(orderCode);
 
             response.set("data", objectMapper.valueToTree(order));
             response.put("error", 0);
@@ -219,7 +220,7 @@ public class PaymentController {
 
             JsonNode data = response.get("data");
             if(data.get("status").asText().equals("PAID")){
-                saveInvoice(response);
+                saveInvoice(response, orderId);
                 Invoice invoice = invoiceRepository.findByOrder_OrderId(orderId).orElse(null);
                 Order newOrder = orderRepository.findById(orderId).orElse(null);
                 String email = newOrder.getCustomer().getEmail();

@@ -41,13 +41,13 @@ public class OrderController {
     }
 
     @GetMapping("/details")
-    public ResponseEntity<ApiResponse<Order>> getOrderDetails(@RequestParam Long id) {
+    public ResponseEntity<ApiResponse<Order>> getOrderDetails(@RequestParam String id) {
         ApiResponse<Order> response = orderService.getOrderDetails(id);
         return ResponseEntity.status(response.getCode() == 1000 ? 200 : 404).body(response);
     }
 
     @PutMapping("/cancel")
-    public ResponseEntity<ApiResponse<Void>> cancelOrder(@RequestParam Long id) {
+    public ResponseEntity<ApiResponse<Void>> cancelOrder(@RequestParam String id) {
         ApiResponse<Void> response = orderService.cancelOrder(id);
         return ResponseEntity.status(response.getCode() == 1000 ? 200 : 400).body(response);
     }
