@@ -1,5 +1,6 @@
 package com.Phong.backend.service;
 
+import com.Phong.backend.dto.request.order.OrderRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.entity.cart.Cart;
 import com.Phong.backend.entity.cart.CartItem;
@@ -7,18 +8,24 @@ import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.entity.order.OrderDetail;
+import com.Phong.backend.entity.product.Discount;
 import com.Phong.backend.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
     @Autowired
     private CartRepository cartRepository;
 
@@ -34,19 +41,25 @@ public class OrderService {
     @Autowired
     private OrderDetailRepository orderDetailRepository;
 
+    @Autowired
+    private DiscountRepository discountRepository;
+
     @Transactional
-    public Order createOrderFromCart(Long customerId, List<Long> cartItemIds, Long addressId) {
+    public Order createOrderFromCart(Long customerId, Long addressId, List<OrderRequest.CartItemDiscountRequest> cartItems, Boolean isUseLoyalty) {
         // Lấy giỏ hàng của khách hàng
         Cart cart = cartRepository.findByCustomer_CustomerId(customerId)
                 .orElseThrow(() -> new RuntimeException("Cart not found for customer"));
 
-
         // Lấy các CartItem từ cart
-        List<CartItem> selectedCartItems = cartItemRepository.findAllById(cartItemIds);
+        List<CartItem> selectedCartItems = cartItemRepository.findAllById(cartItems.stream()
+                .map(OrderRequest.CartItemDiscountRequest::getCartItemId)
+                .collect(Collectors.toList()));
+
         if (selectedCartItems.isEmpty()) {
             throw new RuntimeException("No items selected for order");
         }
 
+        // Lấy địa chỉ giao hàng
         Address deliveryAddress = cart.getCustomer().getAddresses().stream()
                 .filter(address -> address.getAddressId().equals(addressId))
                 .findFirst()
@@ -60,20 +73,53 @@ public class OrderService {
         order.setOrderDate(java.time.LocalDateTime.now());
         order.setStatus("PENDING");  // Trạng thái đơn hàng mới là "PENDING"
 
-        // Lấy chi tiết đơn hàng từ các CartItem đã chọn
         double totalAmount = 0;
-        for (CartItem cartItem : selectedCartItems) {
+
+        for (int i = 0; i < selectedCartItems.size(); i++) {
+            CartItem cartItem = selectedCartItems.get(i);
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
             orderDetail.setProduct(cartItem.getProduct());
             orderDetail.setQuantity(cartItem.getQuantity());
             orderDetail.setPrice(cartItem.getProduct().getPrice());
-            totalAmount += cartItem.getTotalPrice();
-            order.getOrderDetails().add(orderDetail);  // Không còn lỗi NullPointerException
+
+            // Lấy discountId từ cartItems
+            Long discountId = cartItems.get(i).getDiscountId();  // Đảm bảo rằng bạn có getter cho discountId trong CartItemDiscountRequest
+            if (discountId != null) {
+
+                Discount discount = discountRepository.findById(discountId)
+                        .orElseThrow(() -> new RuntimeException("Discount not found"));
+                if (discount.getEndDate().isBefore(LocalDateTime.now())) {
+                    throw new RuntimeException("Discount has expired");
+                }
+                // Kiểm tra xem sản phẩm có áp dụng mã khuyến mãi này không
+                if (cartItem.getProduct().getDiscounts().contains(discount)) {
+                    // Áp dụng giảm giá cho sản phẩm nếu hợp lệ
+                    double discountedPrice = cartItem.getProduct().getPrice() * (1 - discount.getDiscountValue() / 100.0);
+                    orderDetail.setPrice(discountedPrice);  // Cập nhật lại giá sản phẩm sau khi giảm giá
+                } else {
+                    throw new RuntimeException("Discount not applicable for product");
+                }
+            }
+
+            totalAmount += orderDetail.getPrice() * orderDetail.getQuantity();  // Tính lại tổng giá trị của sản phẩm sau khi giảm giá
+            order.getOrderDetails().add(orderDetail);  // Thêm chi tiết đơn hàng vào đơn hàng
         }
 
-        order.setTotalPrice(totalAmount);
-        order.setTotalAmount(totalAmount + order.getShippingFee());
+        if (isUseLoyalty) {
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new RuntimeException("Customer not found"));
+            if(totalAmount >= customer.getLoyalty().getPoints()) {
+                totalAmount = totalAmount - customer.getLoyalty().getPoints();
+                customer.getLoyalty().setPoints(0);
+            } else {
+                customer.getLoyalty().setPoints((int)(customer.getLoyalty().getPoints() - totalAmount));
+                totalAmount = 0.0;
+            }
+        }
+
+        order.setTotalPrice(totalAmount);  // Cập nhật tổng giá trị đơn hàng
+        order.setTotalAmount(totalAmount + order.getShippingFee());  // Thêm phí vận chuyển vào tổng giá trị đơn hàng
 
         // Lưu đơn hàng vào cơ sở dữ liệu
         order = orderRepository.save(order);
@@ -86,8 +132,9 @@ public class OrderService {
         // Xóa các CartItem khỏi cơ sở dữ liệu
         cartItemRepository.deleteAll(selectedCartItems);
 
-        return order;
+        return order;  // Trả về đơn hàng vừa tạo
     }
+
 
 
 

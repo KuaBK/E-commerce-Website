@@ -1,5 +1,7 @@
 package com.Phong.backend.entity.product;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import jakarta.persistence.Entity;
@@ -8,7 +10,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -23,19 +28,22 @@ public class Discount {
 
     private String name; // Tên khuyến mãi
 
+    private String description;
+
     private double discountValue; // Giá trị khuyến mãi (có thể là % hoặc số tiền)
 
     @Column(nullable = false)
-    private LocalDate startDate; // Ngày bắt đầu khuyến mãi
+    private LocalDateTime startDate; // Ngày bắt đầu khuyến mãi
 
     @Column(nullable = false)
-    private LocalDate endDate; // Ngày kết thúc khuyến mãi
+    private LocalDateTime endDate; // Ngày kết thúc khuyến mãi
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "discount_products",
             joinColumns = @JoinColumn(name = "discount_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private Set<Product> products = new HashSet<>(); // Các sản phẩm được áp dụng khuyến mãi
+    @JsonIgnore
+    private List<Product> products = new ArrayList<>();
 }

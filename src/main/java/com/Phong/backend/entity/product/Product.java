@@ -2,6 +2,7 @@ package com.Phong.backend.entity.product;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,7 +37,7 @@ public class Product {
     private Category category;
 
     @ManyToMany(mappedBy = "products")
-    private Set<Discount> promotions = new HashSet<>();
+    private List<Discount> discounts = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "product_id")

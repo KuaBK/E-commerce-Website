@@ -36,6 +36,14 @@ public class CartService {
     // Thêm sản phẩm vào giỏ hàng
     public ApiResponse<Cart> addProductToCart(Long customerId, Long productId, int quantity) {
         Optional<Customer> customerOpt = customerRepository.findById(customerId);
+
+        if (quantity <= 0) {
+            return ApiResponse.<Cart>builder()
+                    .code(400)
+                    .message("Quantity must be greater than zero")
+                    .build();
+        }
+
         if (!customerOpt.isPresent()) {
             return ApiResponse.<Cart>builder()
                     .code(404)
@@ -210,6 +218,7 @@ public class CartService {
      */
     private CartItemResponse mapToCartItemResponse(CartItem cartItem) {
         return CartItemResponse.builder()
+                .cartItemId(cartItem.getCartItemId())
                 .productId(cartItem.getProduct().getProductId())
                 .productName(cartItem.getProduct().getName())
                 .quantity(cartItem.getQuantity())

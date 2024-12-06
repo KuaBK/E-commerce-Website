@@ -34,7 +34,7 @@ public class SecurityConfig {
 
         "/cart/add", "/cart/remove", "/cart/allItems", "/cart/quantity",
 
-        "/order/createOrder", "/order/all", "/order/details", "/order/cancel",
+        "/order/create", "/order/all", "/order/details", "/order/cancel",
 
         "/address", "/address/{id}",
 
@@ -42,8 +42,9 @@ public class SecurityConfig {
 
         "/payment/create", "/payment",
 
-        "/images/upload"
+        "/images/upload",
 
+        "/discounts", "/discounts/{discountId}", "/discounts/product/{productId}"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
