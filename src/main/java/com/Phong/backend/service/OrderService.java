@@ -71,7 +71,7 @@ public class OrderService {
         order.setShippingFee(25000.0);
         order.setDeliveryAddress(deliveryAddress);
         order.setOrderDate(java.time.LocalDateTime.now());
-        order.setStatus("Not_Started");
+        order.setStatus("Not Started");
 
         double totalPrice = 0;
         double totalDiscount = 0;

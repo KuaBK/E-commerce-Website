@@ -98,7 +98,7 @@ public class PaymentController {
             Invoice invoice = new Invoice();
             invoice.setShippingFee(25000.0);
             invoice.setTotalAmount(data.get("amount").asDouble());
-            invoice.setStatus(InvoiceStatus.COMPLETED);
+            invoice.setStatus(InvoiceStatus.valueOf(data.get("status").asText()));
             invoice.setPaymentMethod(PaymentMethod.BANK);
             invoice.setCreatedAt(mapper.convertValue(data.get("createdAt"), Date.class));
 
@@ -222,7 +222,7 @@ public class PaymentController {
             savePayment(response);
 
             JsonNode data = response.get("data");
-            if(data.get("status").asText().equals("COMPLETED")){
+            if(data.get("status").asText().equals("PAID")){
                 saveInvoice(response, orderId);
                 Invoice invoice = invoiceRepository.findByOrder_OrderId(orderId).orElseThrow(() -> new RuntimeException("Invoice not found"));
                 Order newOrder = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
