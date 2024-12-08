@@ -28,7 +28,7 @@ public class SecurityConfig {
         "/customers", "/customers/{customerId}", "/customers/avatar/{customerId}",
 
         "/products", "/products/{productId}", "/products/category/{categoryId}", "/products/all", "/products/{productId}/category/{categoryId}",
-        "/products/{productId}/category", "/products/search", "/products/{productId}/images",
+        "/products/{productId}/category", "/products/search", "/products/{productId}/images", "/products/filter",
 
         "/categories", "/categories/{categoryId}",
 

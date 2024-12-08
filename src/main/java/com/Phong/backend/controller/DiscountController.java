@@ -53,5 +53,10 @@ public class DiscountController {
         ApiResponse<List<String>> response = discountService.getDiscountsForProduct(productId);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/all")
+    public ApiResponse<List<DiscountResponse>> getAllDiscounts() {
+        return discountService.getAllDiscounts();
+    }
 }
 

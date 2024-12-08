@@ -37,8 +37,8 @@ public class CartController {
 
 
     @GetMapping("/allItems")
-    public ResponseEntity<ApiResponse<List<CartItemResponse>>> getAllProductsInCart(@RequestParam Long cartId) {
-        ApiResponse<List<CartItemResponse>> response = cartService.getAllProductsInCart(cartId);
+    public ResponseEntity<ApiResponse<List<CartItemResponse>>> getAllProductsInCart(@RequestParam Long customerId) {
+        ApiResponse<List<CartItemResponse>> response = cartService.getAllProductsInCart(customerId);
         return ResponseEntity.status(response.getCode() == 404 ? HttpStatus.NOT_FOUND : HttpStatus.OK).body(response);
     }
 

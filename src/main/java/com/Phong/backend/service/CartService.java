@@ -142,10 +142,10 @@ public class CartService {
     /**
      * Lấy tất cả sản phẩm trong giỏ hàng.
      */
-    public ApiResponse<List<CartItemResponse>> getAllProductsInCart(Long cartId) {
-        Optional<Cart> optionalCart = cartRepository.findById(cartId);
-        if (optionalCart.isPresent()) {
-            Cart cart = optionalCart.get();
+    public ApiResponse<List<CartItemResponse>> getAllProductsInCart(Long customerId) {
+        Cart cart = cartRepository.findByCustomer_CustomerId(customerId)
+                .orElse(null);
+        if (cart != null) {
             List<CartItemResponse> cartItems = cart.getItems().stream()
                     .map(this::mapToCartItemResponse)
                     .collect(Collectors.toList());

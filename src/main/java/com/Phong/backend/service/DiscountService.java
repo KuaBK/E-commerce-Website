@@ -137,6 +137,19 @@ public class DiscountService {
                 .build();
     }
 
+    public ApiResponse<List<DiscountResponse>> getAllDiscounts() {
+        List<Discount> discounts = discountRepository.findAll();
+
+        List<DiscountResponse> discountResponses = discounts.stream()
+                .map(this::mapToResponse)
+                .toList();
+
+        return ApiResponse.<List<DiscountResponse>>builder()
+                .message("Fetched all discounts successfully")
+                .result(discountResponses)
+                .build();
+    }
+
     private DiscountResponse mapToResponse(Discount discount) {
         List<String> productNames = discount.getProducts().stream()
                 .map(Product::getName)

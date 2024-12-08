@@ -77,4 +77,13 @@ public class ProductController {
                 .message("Product image uploaded successfully")
                 .build());
     }
+
+    @GetMapping("/filter")
+    public List<Product> filterProducts(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String version,
+            @RequestParam(required = false) String origin,
+            @RequestParam(required = false) Double maxPrice) {
+        return productService.filterProducts(category, version, origin, maxPrice);
+    }
 }

@@ -11,6 +11,7 @@ import com.Phong.backend.repository.ProductRepository;
 import com.Phong.backend.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -309,6 +310,24 @@ public class ProductService {
 
         product.getImages().add(image);
         return productRepository.save(product);
+    }
+
+    public List<Product> filterProducts(String category, String version, String origin, Double maxPrice) {
+        Specification<Product> spec = Specification.where(null);
+
+        if (category != null && !category.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasCategory(category));
+        }
+        if (version != null && !version.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasVersion(version));
+        }
+        if (origin != null && !origin.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasOrigin(origin));
+        }
+        if (maxPrice != null) {
+            spec = spec.and(ProductSpecification.priceLessThan(maxPrice));
+        }
+        return productRepository.findAll(spec);
     }
 
     // Helper method to map Product to ProductResponse
