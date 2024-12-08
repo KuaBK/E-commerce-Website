@@ -222,10 +222,10 @@ public class PaymentController {
             savePayment(response);
 
             JsonNode data = response.get("data");
-            if(data.get("status").asText().equals("PAID")){
+            if(data.get("status").asText().equals("COMPLETED")){
                 saveInvoice(response, orderId);
-                Invoice invoice = invoiceRepository.findByOrder_OrderId(orderId).orElse(null);
-                Order newOrder = orderRepository.findById(orderId).orElse(null);
+                Invoice invoice = invoiceRepository.findByOrder_OrderId(orderId).orElseThrow(() -> new RuntimeException("Invoice not found"));
+                Order newOrder = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
                 newOrder.setStatus("Completed");
                 String email = newOrder.getCustomer().getEmail();
                 try {
@@ -241,9 +241,7 @@ public class PaymentController {
                 }
                 loyaltyService.addPoints(invoice.getCustomer().getCustomerId(), invoice.getTotalAmount());
             }
-
             return response;
-
         } catch (Exception e) {
             e.printStackTrace();
             response.put("error", -1);
