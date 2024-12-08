@@ -71,9 +71,10 @@ public class OrderService {
         order.setShippingFee(25000.0);
         order.setDeliveryAddress(deliveryAddress);
         order.setOrderDate(java.time.LocalDateTime.now());
-        order.setStatus("PENDING");  // Trạng thái đơn hàng mới là "PENDING"
+        order.setStatus("Not_Started");
 
-        double totalAmount = 0;
+        double totalPrice = 0;
+        double totalDiscount = 0;
 
         for (int i = 0; i < selectedCartItems.size(); i++) {
             CartItem cartItem = selectedCartItems.get(i);
@@ -82,50 +83,50 @@ public class OrderService {
             orderDetail.setProduct(cartItem.getProduct());
             orderDetail.setQuantity(cartItem.getQuantity());
             orderDetail.setPrice(cartItem.getProduct().getPrice());
+            totalPrice += orderDetail.getPrice() * orderDetail.getQuantity();
+            order.getOrderDetails().add(orderDetail);
 
-            // Lấy discountId từ cartItems
-            Long discountId = cartItems.get(i).getDiscountId();  // Đảm bảo rằng bạn có getter cho discountId trong CartItemDiscountRequest
+            Long discountId = cartItems.get(i).getDiscountId();
             if (discountId != null) {
-
                 Discount discount = discountRepository.findById(discountId)
                         .orElseThrow(() -> new RuntimeException("Discount not found"));
                 if (discount.getEndDate().isBefore(LocalDateTime.now())) {
                     throw new RuntimeException("Discount has expired");
                 }
-                // Kiểm tra xem sản phẩm có áp dụng mã khuyến mãi này không
+
                 if (cartItem.getProduct().getDiscounts().contains(discount)) {
-                    // Áp dụng giảm giá cho sản phẩm nếu hợp lệ
-                    double discountedPrice = cartItem.getProduct().getPrice() * (1 - discount.getDiscountValue() / 100.0);
-                    orderDetail.setPrice(discountedPrice);  // Cập nhật lại giá sản phẩm sau khi giảm giá
+                    double discountedPrice =  orderDetail.getPrice() * orderDetail.getQuantity() * (discount.getDiscountValue() / 100.0);
+                    totalDiscount += discountedPrice;
                 } else {
                     throw new RuntimeException("Discount not applicable for product");
                 }
             }
-
-            totalAmount += orderDetail.getPrice() * orderDetail.getQuantity();  // Tính lại tổng giá trị của sản phẩm sau khi giảm giá
-            order.getOrderDetails().add(orderDetail);  // Thêm chi tiết đơn hàng vào đơn hàng
         }
 
+        double totalLoyalty = 0;
         if (isUseLoyalty) {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new RuntimeException("Customer not found"));
-            if(totalAmount >= customer.getLoyalty().getPoints()) {
-                totalAmount = totalAmount - customer.getLoyalty().getPoints();
+            if(totalPrice >= customer.getLoyalty().getPoints()) {
+                totalLoyalty = totalLoyalty + customer.getLoyalty().getPoints();
                 customer.getLoyalty().setPoints(0);
             } else {
-                customer.getLoyalty().setPoints((int)(customer.getLoyalty().getPoints() - totalAmount));
-                totalAmount = 0.0;
+                customer.getLoyalty().setPoints((int)(customer.getLoyalty().getPoints() - totalPrice));
+                totalLoyalty = totalLoyalty + totalPrice;
+                totalPrice = 0.0;
             }
         }
 
-        order.setTotalPrice(totalAmount);  // Cập nhật tổng giá trị đơn hàng
-        order.setTotalAmount(totalAmount + order.getShippingFee());  // Thêm phí vận chuyển vào tổng giá trị đơn hàng
+        order.setTotalLoyalty(totalLoyalty);
+        order.setTotalDiscount(totalDiscount);
+        order.setTotalPrice(totalPrice);  // Cập nhật tổng giá trị đơn hàng
+        order.setTotalAmount(totalPrice + order.getShippingFee() - totalDiscount - totalLoyalty);  // Thêm phí vận chuyển vào tổng giá trị đơn hàng
 
         // Lưu đơn hàng vào cơ sở dữ liệu
         order = orderRepository.save(order);
 
         // Sau khi đơn hàng được tạo, xóa các CartItem đã chọn khỏi giỏ hàng
-        cart.setTotalPrice(cart.getTotalPrice() - totalAmount);
+        cart.setTotalPrice(cart.getTotalPrice() - totalPrice);
         cart.getItems().removeAll(selectedCartItems);
         cartRepository.save(cart);  // Cập nhật lại giỏ hàng
 

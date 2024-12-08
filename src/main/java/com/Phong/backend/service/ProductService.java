@@ -320,6 +320,7 @@ public class ProductService {
                 .price(product.getPrice())
                 .origin(product.getOrigin())
                 .version(product.getVersion())
+                .images(product.getImages())
                 .evaluate(product.getEvaluate())
                 .stockQuantity(product.getStockQuantity())
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : "Unknown")

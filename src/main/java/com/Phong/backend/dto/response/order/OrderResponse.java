@@ -9,10 +9,12 @@ import lombok.Setter;
 @Builder
 public class OrderResponse {
     private String orderId;      // ID của đơn hàng
-    private String status;     // Trạng thái đơn hàng (ví dụ: "PENDING")
-    private Double totalPrice; // Tổng giá trị của đơn hàng trước khi tính phí vận chuyển
-    private Double totalAmount;// Tổng giá trị của đơn hàng (bao gồm phí vận chuyển)
-    private Double shippingFee;// Phí vận chuyển
-    private String orderDate;  // Ngày giờ đặt hàng
+    private String status;
+    private String orderDate;
+    private Double totalPrice;
+    private Double totalLoyalty;
+    private Double totalDiscount;
+    private Double shippingFee;
+    private Double totalAmount;
 }
 

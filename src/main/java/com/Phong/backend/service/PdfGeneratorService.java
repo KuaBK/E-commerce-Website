@@ -154,6 +154,10 @@ public class PdfGeneratorService {
             // Tổng tiền
             document.add(new Paragraph("Total Price: " + String.format("%.2f", invoice.getTotalPrice()) + " VND")
                     .setMarginTop(5));
+            document.add(new Paragraph("Total Loyalty: " + String.format("%.2f", invoice.getTotalLoyalty()) + " VND")
+                    .setMarginTop(5));
+            document.add(new Paragraph("Total Discount: " + String.format("%.2f", invoice.getTotalDiscount()) + " VND")
+                    .setMarginTop(5));
             document.add(new Paragraph("Shipping Fee: " + String.format("%.2f", invoice.getShippingFee()) + " VND")
                     .setMarginTop(5));
             document.add(new Paragraph("Total Amount: " + String.format("%.2f", invoice.getTotalAmount()) + " VND")

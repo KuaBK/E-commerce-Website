@@ -28,7 +28,9 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
+    private double totalLoyalty;
     private double totalPrice;
+    private double totalDiscount;
     private double shippingFee;
     private double totalAmount;
 

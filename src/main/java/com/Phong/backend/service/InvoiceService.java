@@ -49,6 +49,8 @@ public class InvoiceService {
         Order order = orderRepository.findById(requestDTO.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
+        order.setStatus("In Progress");
+
         Invoice invoice = new Invoice();
         invoice.setOrder(order);
         invoice.setDeliveryAddress(order.getDeliveryAddress());
@@ -56,10 +58,11 @@ public class InvoiceService {
         invoice.setTotalPrice(order.getTotalPrice());
         invoice.setTotalAmount(order.getTotalAmount());
         invoice.setPaymentMethod(PaymentMethod.COD);
-        invoice.setStatus(InvoiceStatus.PENDING);
+        invoice.setStatus(InvoiceStatus.IN_PROGRESS);
         invoice.setCreatedAt(new Date());
         invoice.setCustomer(order.getCustomer());
-
+        invoice.setTotalDiscount(order.getTotalDiscount());
+        invoice.setTotalLoyalty(order.getTotalLoyalty());
         invoice = invoiceRepository.save(invoice);
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
@@ -82,7 +85,7 @@ public class InvoiceService {
             detail.getProduct().setStockQuantity(detail.getProduct().getStockQuantity() - detail.getQuantity());
         }
 
-        loyaltyService.addPoints(invoice.getCustomer().getCustomerId(), invoice.getTotalAmount());
+        loyaltyService.addPoints(invoice.getCustomer().getCustomerId(), invoice.getTotalPrice());
 
         String email = order.getCustomer().getEmail();
         try {
@@ -101,6 +104,9 @@ public class InvoiceService {
                 .paymentMethod(invoice.getPaymentMethod())
                 .date(invoice.getCreatedAt())
                 .totalPrice(invoice.getTotalPrice())
+                .totalLoyalty(invoice.getTotalLoyalty())
+                .totalDiscount(invoice.getTotalDiscount())
+                .totalAmount(invoice.getTotalAmount())
                 .build();
     }
 
@@ -118,6 +124,9 @@ public class InvoiceService {
                 .paymentMethod(invoice.getPaymentMethod())
                 .date(invoice.getCreatedAt())
                 .totalPrice(invoice.getTotalPrice())
+                .totalLoyalty(invoice.getTotalLoyalty())
+                .totalDiscount(invoice.getTotalDiscount())
+                .totalAmount(invoice.getTotalAmount())
                 .build();
     }
 
@@ -145,6 +154,9 @@ public class InvoiceService {
                         .paymentMethod(invoice.getPaymentMethod())
                         .date(invoice.getCreatedAt())
                         .totalPrice(invoice.getTotalPrice())
+                        .totalLoyalty(invoice.getTotalLoyalty())
+                        .totalDiscount(invoice.getTotalDiscount())
+                        .totalAmount(invoice.getTotalAmount())
                         .build())
                 .collect(Collectors.toList());
     }
