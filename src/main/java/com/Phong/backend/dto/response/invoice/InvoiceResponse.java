@@ -21,6 +21,8 @@ public class InvoiceResponse {
     private PaymentMethod paymentMethod;
     private Date date;
     private double totalPrice;
+    private double totalLoyalty;
+    private double totalDiscount;
     private double shippingFee;
     private double totalAmount;
 }

@@ -98,7 +98,7 @@ public class PaymentController {
             Invoice invoice = new Invoice();
             invoice.setShippingFee(25000.0);
             invoice.setTotalAmount(data.get("amount").asDouble());
-            invoice.setStatus(InvoiceStatus.valueOf(data.get("status").asText()));
+            invoice.setStatus(InvoiceStatus.COMPLETED);
             invoice.setPaymentMethod(PaymentMethod.BANK);
             invoice.setCreatedAt(mapper.convertValue(data.get("createdAt"), Date.class));
 
@@ -108,6 +108,8 @@ public class PaymentController {
             invoice.setOrder(order);
             invoice.setCustomer(order.getCustomer());
             invoice.setTotalPrice(order.getTotalPrice());
+            invoice.setTotalLoyalty(order.getTotalLoyalty());
+            invoice.setTotalDiscount(order.getTotalDiscount());
 
             invoiceRepository.save(invoice);
 
@@ -148,6 +150,7 @@ public class PaymentController {
             }
 
             Order order = optionalOrder.get();
+            order.setStatus("In Progress");
 
             // Lấy thông tin sản phẩm từ OrderDetails
             StringBuilder productNames = new StringBuilder();
@@ -170,7 +173,7 @@ public class PaymentController {
             // Tạo đối tượng ItemData
             ItemData item = ItemData.builder()
                     .name(productNames.toString())
-                    .price((int)(totalAmount + order.getShippingFee()))
+                    .price((int)(totalAmount + order.getShippingFee() - order.getTotalDiscount() - order.getTotalLoyalty()))
                     .quantity(totalQuantity)
                     .build();
 
@@ -180,7 +183,7 @@ public class PaymentController {
             PaymentData paymentData = PaymentData.builder()
                     .orderCode(orderCode)
                     .description("OrderCode# " + orderCode)
-                    .amount((int) totalAmount + (int)order.getShippingFee())
+                    .amount((int)(totalAmount + order.getShippingFee() - order.getTotalDiscount() - order.getTotalLoyalty()))
                     .item(item)
                     .returnUrl(returnUrl)
                     .cancelUrl(cancelUrl)
@@ -223,6 +226,7 @@ public class PaymentController {
                 saveInvoice(response, orderId);
                 Invoice invoice = invoiceRepository.findByOrder_OrderId(orderId).orElse(null);
                 Order newOrder = orderRepository.findById(orderId).orElse(null);
+                newOrder.setStatus("Completed");
                 String email = newOrder.getCustomer().getEmail();
                 try {
                     invoiceProcessingService.processInvoice(invoice, email);

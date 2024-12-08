@@ -52,7 +52,8 @@ public class Invoice {
     private PaymentMethod paymentMethod;
 
     private Date createdAt;
-
+    private double totalLoyalty;
+    private double totalDiscount;
     private double totalPrice;
     private double shippingFee;
     private double totalAmount;

@@ -21,7 +21,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class OrderController {
-    @Autowired
+
     private OrderService orderService;
 
     @PostMapping("/create")
@@ -50,6 +50,8 @@ public class OrderController {
                 .orderId(order.getOrderId())
                 .status(order.getStatus())
                 .totalPrice(order.getTotalPrice())
+                .totalLoyalty(order.getTotalLoyalty())
+                .totalDiscount(order.getTotalDiscount())
                 .totalAmount(order.getTotalAmount())
                 .shippingFee(order.getShippingFee())
                 .orderDate(order.getOrderDate().toString())
