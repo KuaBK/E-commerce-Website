@@ -341,6 +341,7 @@ public class ProductService {
                 .version(product.getVersion())
                 .images(product.getImages())
                 .evaluate(product.getEvaluate())
+                .quantitySold(product.getQuantitySold())
                 .stockQuantity(product.getStockQuantity())
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : "Unknown")
                 .build();
