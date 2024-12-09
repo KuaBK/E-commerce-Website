@@ -9,6 +9,7 @@ import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.entity.order.OrderDetail;
 import com.Phong.backend.entity.product.Discount;
+import com.Phong.backend.entity.product.Product;
 import com.Phong.backend.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +66,7 @@ public class OrderService {
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Delivery address not found for customer"));
 
+
         // Tạo đơn hàng mới từ các CartItem đã chọn
         Order order = new Order();
         order.setCustomer(cart.getCustomer());
@@ -72,12 +74,18 @@ public class OrderService {
         order.setDeliveryAddress(deliveryAddress);
         order.setOrderDate(java.time.LocalDateTime.now());
         order.setStatus("Not Started");
+        order.setDeliveryDate(java.time.LocalDateTime.now().plusDays(3));
 
         double totalPrice = 0;
         double totalDiscount = 0;
 
         for (int i = 0; i < selectedCartItems.size(); i++) {
             CartItem cartItem = selectedCartItems.get(i);
+
+            if (cartItem.getProduct().getStockQuantity() < cartItem.getQuantity()) {
+                throw new RuntimeException("Insufficient stock for product: " + cartItem.getProduct().getName());
+            }
+
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
             orderDetail.setProduct(cartItem.getProduct());

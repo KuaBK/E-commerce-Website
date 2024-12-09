@@ -18,5 +18,6 @@ public class ProductResponse {
     private String evaluate;
     private List<ProductImage> images;
     private Integer stockQuantity;
+    private Integer quantitySold;
     private String categoryName;
 }

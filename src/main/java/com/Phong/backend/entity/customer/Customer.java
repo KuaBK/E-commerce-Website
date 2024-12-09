@@ -6,9 +6,7 @@ import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.entity.Gender;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -23,7 +21,12 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "customer")
+@Table(name = "customer",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"Email"}),
+                @UniqueConstraint(columnNames = {"Phone"}),
+                @UniqueConstraint(columnNames = {"citizenId"})
+        })
 public class Customer {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "AccountId", referencedColumnName = "AccountId")
@@ -34,11 +37,13 @@ public class Customer {
     @Column(name = "customerId", unique = true)
     Long customerId;
 
-    @NotBlank
+    @NotBlank(message = "First name cannot be blank")
+    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "First name must contain only letters and spaces")
     @Column(name = "FirstName")
     String firstName;
 
-    @NotBlank
+    @NotBlank(message = "Last name cannot be blank")
+    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Last name must contain only letters and spaces")
     @Column(name = "LastName")
     String lastName;
 
@@ -46,17 +51,24 @@ public class Customer {
     @Column(name = "Gender")
     Gender gender;
 
+    @NotNull(message = "Citizen ID cannot be null")
+    @Pattern(regexp = "^[0-9]{12}$", message = "Citizen ID must be 12 digits")
+    @Column(unique = true)
     String citizenId;
 
+    @NotNull(message = "Birthday cannot be null")
+    @Past(message = "Birthday must be in the past")
+    @Column(name = "Birthday")
     LocalDate birthday;
 
-    @NotBlank
-    @Email
-    @Column(name = "Email")
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Invalid email format")
+    @Column(name = "Email", unique = true)
     String email;
 
-    @Size(max = 10)
-    @Column(name = "Phone")
+    @NotBlank(message = "Phone number cannot be blank")
+    @Pattern(regexp = "^(03|05|07|08|09)\\d{8}$", message = "Phone number must be 10 digits and start with a valid prefix (e.g., 03, 05, 07, 08, 09)")
+    @Column(name = "Phone", unique = true)
     String phone;
 
     @Column(name = "Address")
