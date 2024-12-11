@@ -1,15 +1,17 @@
 package com.Phong.backend.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.Phong.backend.dto.request.customer.AddressRequest;
-import com.Phong.backend.dto.response.AddressResponse;
+import com.Phong.backend.dto.response.customer.AddressResponse;
 import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.repository.AddressRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -41,8 +43,7 @@ public class AddressService {
     }
 
     public AddressResponse patchAddress(Long id, AddressRequest addressRequest) {
-        Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Address not found"));
+        Address address = addressRepository.findById(id).orElseThrow(() -> new RuntimeException("Address not found"));
 
         // Chỉ cập nhật các trường không null từ AddressRequest
         if (address.getFullName() != null) {
@@ -73,7 +74,6 @@ public class AddressService {
         Address updatedAddress = addressRepository.save(address);
         return convertToResponse(updatedAddress);
     }
-
 
     public void deleteAddress(Long id) {
         if (!addressRepository.existsById(id)) {

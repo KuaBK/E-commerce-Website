@@ -1,13 +1,14 @@
 package com.Phong.backend.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.Phong.backend.dto.request.product.CategoryRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.product.CategoryResponse;
 import com.Phong.backend.service.CategoryService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/categories")
@@ -22,7 +23,8 @@ public class CategoryController {
     }
 
     @PatchMapping("/{categoryId}")
-    public ApiResponse<CategoryResponse> updateCategory(@PathVariable Long categoryId, @RequestBody CategoryRequest categoryRequest) {
+    public ApiResponse<CategoryResponse> updateCategory(
+            @PathVariable Long categoryId, @RequestBody CategoryRequest categoryRequest) {
         return categoryService.updateCategory(categoryId, categoryRequest);
     }
 

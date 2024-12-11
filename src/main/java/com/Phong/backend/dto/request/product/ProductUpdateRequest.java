@@ -1,7 +1,10 @@
 package com.Phong.backend.dto.request.product;
 
-import lombok.*;
 import java.util.List;
+
+import com.Phong.backend.entity.product.ProductImage;
+
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -14,7 +17,7 @@ public class ProductUpdateRequest {
     private String origin;
     private String version;
     private String evaluate;
-    private List<String> images;
+    private List<ProductImage> images;
     private Integer stockQuantity;
     private Long categoryId;
 }

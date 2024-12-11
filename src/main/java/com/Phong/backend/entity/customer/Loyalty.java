@@ -1,9 +1,10 @@
 package com.Phong.backend.entity.customer;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDate;
+
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Data
@@ -21,4 +22,7 @@ public class Loyalty {
 
     private int points;
     private int accumulationNumber;
+
+    @Column(name = "CreateAt")
+    private LocalDate CreateAt;
 }

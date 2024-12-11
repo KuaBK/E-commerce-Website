@@ -1,13 +1,16 @@
 package com.Phong.backend.entity.invoice;
 
-import com.Phong.backend.entity.customer.Address;
-import com.Phong.backend.entity.employee.Seller;
-import com.Phong.backend.entity.order.Order;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+
+import jakarta.persistence.*;
+
+import com.Phong.backend.entity.customer.Address;
+import com.Phong.backend.entity.customer.Customer;
+import com.Phong.backend.entity.order.Order;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.*;
 
 @Entity
 @Data
@@ -15,19 +18,33 @@ import java.util.List;
 @AllArgsConstructor
 public class Invoice {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long invoiceId;
-
-    private LocalDateTime issuedDate;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "address_id")
     private Address deliveryAddress;
 
-    @ManyToOne
+    @OneToOne
     private Order order;
 
+    @ManyToOne
+    private Customer customer;
+
+    @Column(nullable = false, updatable = false)
+    private String sellerName = "IT HOSPITAL";
+
+    @Column(nullable = false, updatable = false)
+    private String sellerAddress = "HCMUT";
+
+    @Column(nullable = false, updatable = false)
+    private String sellerPhone = "0944102246";
+
+    @Column(nullable = true, updatable = false)
+    private String website = "IT HOSPITAL";
+
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<InvoiceDetail> details;
 
     @Enumerated(EnumType.STRING)
@@ -36,7 +53,10 @@ public class Invoice {
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
-    private LocalDateTime createdAt;
+    private Date createdAt;
+    private double totalLoyalty;
+    private double totalDiscount;
+    private double totalPrice;
     private double shippingFee;
     private double totalAmount;
 }

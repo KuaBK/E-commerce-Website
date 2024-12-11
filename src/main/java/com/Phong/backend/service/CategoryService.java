@@ -1,21 +1,21 @@
 package com.Phong.backend.service;
 
-import com.Phong.backend.dto.request.product.CategoryRequest;
-import com.Phong.backend.dto.response.ApiResponse;
-import com.Phong.backend.dto.response.product.CategoryResponse;
-import com.Phong.backend.dto.response.product.ProductResponse;
-import com.Phong.backend.service.ProductService;
-import com.Phong.backend.entity.product.Category;
-import com.Phong.backend.repository.CategoryRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.Phong.backend.entity.product.Product;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.Phong.backend.dto.request.product.CategoryRequest;
+import com.Phong.backend.dto.response.ApiResponse;
+import com.Phong.backend.dto.response.product.CategoryResponse;
+import com.Phong.backend.entity.product.Category;
+import com.Phong.backend.entity.product.Product;
+import com.Phong.backend.repository.CategoryRepository;
 
 @Service
 public class CategoryService {
@@ -47,7 +47,8 @@ public class CategoryService {
         if (existingCategory.isPresent()) {
             Category updatedCategory = existingCategory.get();
             if (categoryRequest.getName() != null) updatedCategory.setName(categoryRequest.getName());
-            if (categoryRequest.getDescription() != null) updatedCategory.setDescription(categoryRequest.getDescription());
+            if (categoryRequest.getDescription() != null)
+                updatedCategory.setDescription(categoryRequest.getDescription());
             Category savedCategory = categoryRepository.save(updatedCategory);
 
             CategoryResponse response = mapToCategoryResponse(savedCategory);
@@ -83,9 +84,8 @@ public class CategoryService {
     // Get all Categories
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
-        List<CategoryResponse> categoryResponses = categories.stream()
-                .map(this::mapToCategoryResponse)
-                .collect(Collectors.toList());
+        List<CategoryResponse> categoryResponses =
+                categories.stream().map(this::mapToCategoryResponse).collect(Collectors.toList());
         return ApiResponse.<List<CategoryResponse>>builder()
                 .message("Categories retrieved successfully")
                 .result(categoryResponses)
@@ -113,9 +113,7 @@ public class CategoryService {
             products = new ArrayList<>();
         }
 
-        List<String> productNames = products.stream()
-                .map(Product::getName)
-                .collect(Collectors.toList());
+        List<String> productNames = products.stream().map(Product::getName).collect(Collectors.toList());
 
         return CategoryResponse.builder()
                 .categoryId(category.getCategoryId())

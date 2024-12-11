@@ -1,23 +1,32 @@
 package com.Phong.backend.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.Phong.backend.dto.request.product.ProductRequest;
 import com.Phong.backend.dto.request.product.ProductUpdateRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.product.ProductResponse;
-import com.Phong.backend.entity.product.Product;
 import com.Phong.backend.entity.product.Category;
-import com.Phong.backend.repository.ProductRepository;
+import com.Phong.backend.entity.product.Product;
+import com.Phong.backend.entity.product.ProductImage;
 import com.Phong.backend.repository.CategoryRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.Phong.backend.repository.ProductRepository;
 
 @Service
 public class ProductService {
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     @Autowired
     private ProductRepository productRepository;
@@ -51,8 +60,8 @@ public class ProductService {
                 .evaluate(productRequest.getEvaluate())
                 .images(productRequest.getImages())
                 .stockQuantity(productRequest.getStockQuantity())
-                .category(category)  // category có thể là null
-                .quantitySold(0)  // Giá trị mặc định
+                .category(category) // category có thể là null
+                .quantitySold(0) // Giá trị mặc định
                 .build();
 
         Product savedProduct = productRepository.save(product);
@@ -78,13 +87,16 @@ public class ProductService {
 
             // Cập nhật các trường của product nếu có giá trị mới
             if (productUpdateRequest.getName() != null) updatedProduct.setName(productUpdateRequest.getName());
-            if (productUpdateRequest.getDescription() != null) updatedProduct.setDescription(productUpdateRequest.getDescription());
+            if (productUpdateRequest.getDescription() != null)
+                updatedProduct.setDescription(productUpdateRequest.getDescription());
             if (productUpdateRequest.getPrice() != null) updatedProduct.setPrice(productUpdateRequest.getPrice());
             if (productUpdateRequest.getOrigin() != null) updatedProduct.setOrigin(productUpdateRequest.getOrigin());
-            if (productUpdateRequest.getVersion() != null) updatedProduct.setVersion(productUpdateRequest.getVersion());
-            if (productUpdateRequest.getEvaluate() != null) updatedProduct.setEvaluate(productUpdateRequest.getEvaluate());
             if (productUpdateRequest.getImages() != null) updatedProduct.setImages(productUpdateRequest.getImages());
-            if (productUpdateRequest.getStockQuantity() != null) updatedProduct.setStockQuantity(productUpdateRequest.getStockQuantity());
+            if (productUpdateRequest.getVersion() != null) updatedProduct.setVersion(productUpdateRequest.getVersion());
+            if (productUpdateRequest.getEvaluate() != null)
+                updatedProduct.setEvaluate(productUpdateRequest.getEvaluate());
+            if (productUpdateRequest.getStockQuantity() != null)
+                updatedProduct.setStockQuantity(productUpdateRequest.getStockQuantity());
 
             // Kiểm tra và cập nhật Category nếu categoryId có giá trị
             if (productUpdateRequest.getCategoryId() != null) {
@@ -93,7 +105,8 @@ public class ProductService {
                     updatedProduct.setCategory(category.get());
                     if (category.get().getProducts() != null) {
                         category.get().getProducts().add(updatedProduct);
-                        categoryRepository.save(category.get());}
+                        categoryRepository.save(category.get());
+                    }
                 } else {
                     // Nếu không tìm thấy category với id, bạn có thể trả về thông báo lỗi hoặc xử lý theo yêu cầu
                     return ApiResponse.<ProductResponse>builder()
@@ -120,7 +133,6 @@ public class ProductService {
         }
     }
 
-
     // Delete Product
     @Transactional
     public ApiResponse<Void> deleteProduct(Long productId) {
@@ -138,15 +150,13 @@ public class ProductService {
         }
     }
 
-
     // Get all Products in a Category
     public ApiResponse<List<ProductResponse>> getAllProductsByCategory(Long categoryId) {
         Optional<Category> category = categoryRepository.findById(categoryId);
         if (category.isPresent()) {
             List<Product> products = category.get().getProducts();
-            List<ProductResponse> productResponses = products.stream()
-                    .map(this::mapToProductResponse)
-                    .collect(Collectors.toList());
+            List<ProductResponse> productResponses =
+                    products.stream().map(this::mapToProductResponse).collect(Collectors.toList());
             return ApiResponse.<List<ProductResponse>>builder()
                     .message("Products retrieved successfully")
                     .result(productResponses)
@@ -177,9 +187,8 @@ public class ProductService {
         List<Product> products = productRepository.findAll();
 
         // Chuyển đổi các sản phẩm thành ProductResponse
-        List<ProductResponse> productResponses = products.stream()
-                .map(this::mapToProductResponse)
-                .collect(Collectors.toList());
+        List<ProductResponse> productResponses =
+                products.stream().map(this::mapToProductResponse).collect(Collectors.toList());
 
         // Trả về ApiResponse với danh sách các sản phẩm
         return ApiResponse.<List<ProductResponse>>builder()
@@ -268,9 +277,8 @@ public class ProductService {
         List<Product> products = productRepository.findByNameContainingIgnoreCase(keyword);
 
         // Chuyển đổi sản phẩm thành ProductResponse
-        List<ProductResponse> productResponses = products.stream()
-                .map(this::mapToProductResponse)
-                .collect(Collectors.toList());
+        List<ProductResponse> productResponses =
+                products.stream().map(this::mapToProductResponse).collect(Collectors.toList());
 
         if (productResponses.isEmpty()) {
             return ApiResponse.<List<ProductResponse>>builder()
@@ -285,6 +293,41 @@ public class ProductService {
                 .build();
     }
 
+    public Product addProductImage(Long productId, MultipartFile file) throws IOException {
+        Product product =
+                productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Upload ảnh lên Cloudinary
+        Map uploadResult = cloudinaryService.uploadImage(file);
+        String url = (String) uploadResult.get("url");
+        String cloudinaryId = (String) uploadResult.get("public_id");
+
+        // Lưu thông tin ảnh vào database
+        ProductImage image =
+                ProductImage.builder().url(url).cloudinaryId(cloudinaryId).build();
+
+        product.getImages().add(image);
+        return productRepository.save(product);
+    }
+
+    public List<Product> filterProducts(String category, String version, String origin, Double maxPrice) {
+        Specification<Product> spec = Specification.where(null);
+
+        if (category != null && !category.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasCategory(category));
+        }
+        if (version != null && !version.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasVersion(version));
+        }
+        if (origin != null && !origin.isEmpty()) {
+            spec = spec.and(ProductSpecification.hasOrigin(origin));
+        }
+        if (maxPrice != null) {
+            spec = spec.and(ProductSpecification.priceLessThan(maxPrice));
+        }
+        return productRepository.findAll(spec);
+    }
+
     // Helper method to map Product to ProductResponse
     public ProductResponse mapToProductResponse(Product product) {
         return ProductResponse.builder()
@@ -294,10 +337,12 @@ public class ProductService {
                 .price(product.getPrice())
                 .origin(product.getOrigin())
                 .version(product.getVersion())
-                .evaluate(product.getEvaluate())
                 .images(product.getImages())
+                .evaluate(product.getEvaluate())
+                .quantitySold(product.getQuantitySold())
                 .stockQuantity(product.getStockQuantity())
-                .categoryName(product.getCategory() != null ? product.getCategory().getName() : "Unknown")
+                .categoryName(
+                        product.getCategory() != null ? product.getCategory().getName() : "Unknown")
                 .build();
     }
 }

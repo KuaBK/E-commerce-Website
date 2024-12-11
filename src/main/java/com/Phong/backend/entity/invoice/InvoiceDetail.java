@@ -1,9 +1,10 @@
 package com.Phong.backend.entity.invoice;
 
-import com.Phong.backend.entity.product.Product;
 import jakarta.persistence.*;
-import lombok.*;
 
+import com.Phong.backend.entity.product.Product;
+
+import lombok.*;
 
 @Entity
 @Data
@@ -15,7 +16,7 @@ public class InvoiceDetail {
     private Long invoiceDetailId;
 
     @ManyToOne
-    @JoinColumn(name = "InvoiceId", nullable = false)
+    @JoinColumn(name = "id", nullable = false)
     private Invoice invoice;
 
     @ManyToOne

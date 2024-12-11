@@ -2,12 +2,12 @@ package com.Phong.backend.entity.employee;
 
 import java.time.LocalDate;
 
-import com.Phong.backend.entity.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import com.Phong.backend.entity.Gender;
 import com.Phong.backend.entity.account.Account;
 
 import lombok.*;

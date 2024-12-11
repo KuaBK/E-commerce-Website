@@ -1,11 +1,11 @@
 package com.Phong.backend.dto.request.customer;
 
+import java.time.LocalDate;
 
 import com.Phong.backend.entity.Gender;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
 
 @Data
 @Builder

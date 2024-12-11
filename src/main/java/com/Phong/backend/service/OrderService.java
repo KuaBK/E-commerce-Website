@@ -1,5 +1,16 @@
 package com.Phong.backend.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.Phong.backend.dto.request.order.OrderRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.entity.cart.Cart;
 import com.Phong.backend.entity.cart.CartItem;
@@ -7,19 +18,17 @@ import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.entity.order.OrderDetail;
-import com.Phong.backend.exception.AppException;
+import com.Phong.backend.entity.product.Discount;
 import com.Phong.backend.repository.*;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-import java.util.Optional;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
     @Autowired
     private CartRepository cartRepository;
 
@@ -35,19 +44,30 @@ public class OrderService {
     @Autowired
     private OrderDetailRepository orderDetailRepository;
 
+    @Autowired
+    private DiscountRepository discountRepository;
+
     @Transactional
-    public Order createOrderFromCart(Long customerId, List<Long> cartItemIds, Long addressId) {
+    public Order createOrderFromCart(
+            Long customerId,
+            Long addressId,
+            List<OrderRequest.CartItemDiscountRequest> cartItems,
+            Boolean isUseLoyalty) {
         // Lấy giỏ hàng của khách hàng
-        Cart cart = cartRepository.findById(customerId)
+        Cart cart = cartRepository
+                .findByCustomer_CustomerId(customerId)
                 .orElseThrow(() -> new RuntimeException("Cart not found for customer"));
 
-
         // Lấy các CartItem từ cart
-        List<CartItem> selectedCartItems = cartItemRepository.findAllById(cartItemIds);
+        List<CartItem> selectedCartItems = cartItemRepository.findAllById(cartItems.stream()
+                .map(OrderRequest.CartItemDiscountRequest::getCartItemId)
+                .collect(Collectors.toList()));
+
         if (selectedCartItems.isEmpty()) {
             throw new RuntimeException("No items selected for order");
         }
 
+        // Lấy địa chỉ giao hàng
         Address deliveryAddress = cart.getCustomer().getAddresses().stream()
                 .filter(address -> address.getAddressId().equals(addressId))
                 .findFirst()
@@ -59,37 +79,83 @@ public class OrderService {
         order.setShippingFee(25000.0);
         order.setDeliveryAddress(deliveryAddress);
         order.setOrderDate(java.time.LocalDateTime.now());
-        order.setStatus("PENDING");  // Trạng thái đơn hàng mới là "PENDING"
+        order.setStatus("Not Started");
+        order.setDeliveryDate(java.time.LocalDateTime.now().plusDays(3));
 
-        // Lấy chi tiết đơn hàng từ các CartItem đã chọn
-        double totalAmount = 0;
-        for (CartItem cartItem : selectedCartItems) {
+        double totalPrice = 0;
+        double totalDiscount = 0;
+
+        for (int i = 0; i < selectedCartItems.size(); i++) {
+            CartItem cartItem = selectedCartItems.get(i);
+
+            if (cartItem.getProduct().getStockQuantity() < cartItem.getQuantity()) {
+                throw new RuntimeException("Insufficient stock for product: "
+                        + cartItem.getProduct().getName());
+            }
+
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
             orderDetail.setProduct(cartItem.getProduct());
             orderDetail.setQuantity(cartItem.getQuantity());
             orderDetail.setPrice(cartItem.getProduct().getPrice());
-            totalAmount += cartItem.getTotalPrice();
-            order.getOrderDetails().add(orderDetail);  // Không còn lỗi NullPointerException
+            totalPrice += orderDetail.getPrice() * orderDetail.getQuantity();
+            order.getOrderDetails().add(orderDetail);
+
+            Long discountId = cartItems.get(i).getDiscountId();
+            if (discountId != null) {
+                Discount discount = discountRepository
+                        .findById(discountId)
+                        .orElseThrow(() -> new RuntimeException("Discount not found"));
+                if (discount.getEndDate().isBefore(LocalDateTime.now())) {
+                    throw new RuntimeException("Discount has expired");
+                }
+
+                if (cartItem.getProduct().getDiscounts().contains(discount)) {
+                    double discountedPrice =
+                            orderDetail.getPrice() * orderDetail.getQuantity() * (discount.getDiscountValue() / 100.0);
+                    totalDiscount += discountedPrice;
+                } else {
+                    throw new RuntimeException("Discount not applicable for product");
+                }
+            }
         }
 
-        order.setTotalAmount(totalAmount + order.getShippingFee());
+        double totalLoyalty = 0;
+        if (isUseLoyalty) {
+            Customer customer = customerRepository
+                    .findById(customerId)
+                    .orElseThrow(() -> new RuntimeException("Customer not found"));
+            if (totalPrice >= customer.getLoyalty().getPoints()) {
+                totalLoyalty = totalLoyalty + customer.getLoyalty().getPoints();
+                customer.getLoyalty().setPoints(0);
+            } else {
+                customer.getLoyalty().setPoints((int) (customer.getLoyalty().getPoints() - totalPrice));
+                totalLoyalty = totalLoyalty + totalPrice;
+                totalPrice = 0.0;
+            }
+        }
+
+        order.setTotalLoyalty(totalLoyalty);
+        order.setTotalDiscount(totalDiscount);
+        order.setTotalPrice(totalPrice); // Cập nhật tổng giá trị đơn hàng
+        order.setTotalAmount(totalPrice
+                + order.getShippingFee()
+                - totalDiscount
+                - totalLoyalty); // Thêm phí vận chuyển vào tổng giá trị đơn hàng
 
         // Lưu đơn hàng vào cơ sở dữ liệu
         order = orderRepository.save(order);
 
         // Sau khi đơn hàng được tạo, xóa các CartItem đã chọn khỏi giỏ hàng
-        cart.setTotalPrice(cart.getTotalPrice() - totalAmount);
+        cart.setTotalPrice(cart.getTotalPrice() - totalPrice);
         cart.getItems().removeAll(selectedCartItems);
-        cartRepository.save(cart);  // Cập nhật lại giỏ hàng
+        cartRepository.save(cart); // Cập nhật lại giỏ hàng
 
         // Xóa các CartItem khỏi cơ sở dữ liệu
         cartItemRepository.deleteAll(selectedCartItems);
 
-        return order;
+        return order; // Trả về đơn hàng vừa tạo
     }
-
-
 
     public ApiResponse<List<Order>> getOrdersByCustomer(Long customerId) {
         Optional<Customer> customerOpt = customerRepository.findById(customerId);
@@ -109,7 +175,7 @@ public class OrderService {
                 .build();
     }
 
-    public ApiResponse<Order> getOrderDetails(Long orderId) {
+    public ApiResponse<Order> getOrderDetails(String orderId) {
         Optional<Order> orderOpt = orderRepository.findById(orderId);
         if (!orderOpt.isPresent()) {
             return ApiResponse.<Order>builder()
@@ -125,7 +191,7 @@ public class OrderService {
                 .build();
     }
 
-    public ApiResponse<Void> cancelOrder(Long orderId) {
+    public ApiResponse<Void> cancelOrder(String orderId) {
         Optional<Order> orderOpt = orderRepository.findById(orderId);
         if (!orderOpt.isPresent()) {
             return ApiResponse.<Void>builder()
@@ -150,4 +216,3 @@ public class OrderService {
                 .build();
     }
 }
-

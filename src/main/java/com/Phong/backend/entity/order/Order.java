@@ -1,14 +1,16 @@
 package com.Phong.backend.entity.order;
 
-import com.Phong.backend.entity.customer.Address;
-import com.Phong.backend.entity.customer.Customer;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.*;
+
+import com.Phong.backend.entity.customer.Address;
+import com.Phong.backend.entity.customer.Customer;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.*;
 
 @Entity
 @Data
@@ -17,8 +19,8 @@ import java.util.List;
 @Table(name = "orders")
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String orderId;
 
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
@@ -28,8 +30,10 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
+    private double totalLoyalty;
+    private double totalPrice;
+    private double totalDiscount;
     private double shippingFee;
-
     private double totalAmount;
 
     private LocalDateTime orderDate;

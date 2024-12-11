@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InvoiceRequest {
-    private Long orderId; // ID của đơn hàng
+    private String orderId; // ID của đơn hàng
 }

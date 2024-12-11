@@ -3,6 +3,8 @@ package com.Phong.backend.controller;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +31,7 @@ public class AccountController {
     // Create Account
     @PostMapping
     public ResponseEntity<ApiResponse<AccountResponse>> createAccount(
-            @RequestBody AccountCreationRequest accountRequest) {
+            @Valid @RequestBody AccountCreationRequest accountRequest) {
         AccountResponse createdAccount = accountService.createAccount(accountRequest);
         ApiResponse<AccountResponse> response = ApiResponse.<AccountResponse>builder()
                 .message("Account created successfully")
@@ -95,9 +97,7 @@ public class AccountController {
                     .build();
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            response = ApiResponse.<Void>builder()
-                    .message("Account not found")
-                    .build();
+            response = ApiResponse.<Void>builder().message("Account not found").build();
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

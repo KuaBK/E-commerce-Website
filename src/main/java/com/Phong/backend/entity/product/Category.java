@@ -1,10 +1,10 @@
 package com.Phong.backend.entity.product;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.List;
+
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Data

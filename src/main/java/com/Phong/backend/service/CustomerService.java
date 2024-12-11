@@ -1,20 +1,26 @@
 package com.Phong.backend.service;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.Phong.backend.dto.request.customer.CustomerCreationRequest;
 import com.Phong.backend.dto.request.customer.CustomerUpdateRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.customer.CustomerResponse;
 import com.Phong.backend.entity.account.Account;
 import com.Phong.backend.entity.cart.Cart;
+import com.Phong.backend.entity.customer.Avatar;
 import com.Phong.backend.entity.customer.Customer;
-import com.Phong.backend.repository.AccountRepository;
-import com.Phong.backend.repository.CartRepository;
-import com.Phong.backend.repository.CustomerRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import com.Phong.backend.entity.customer.Loyalty;
+import com.Phong.backend.repository.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -23,13 +29,16 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final AccountRepository accountRepository;
     private final CartRepository cartRepository;
-
+    private final CloudinaryService cloudinaryService;
+    private final AvatarRepository avatarRepository;
+    private final LoyaltyRepository loyaltyRepository;
 
     /**
      * Create a new customer.
      */
     public ApiResponse<CustomerResponse> createCustomer(CustomerCreationRequest request) {
-        Account account = accountRepository.findById(request.getAccountId())
+        Account account = accountRepository
+                .findById(request.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
         Customer customer = Customer.builder()
@@ -46,6 +55,16 @@ public class CustomerService {
                 .build();
 
         customer = customerRepository.save(customer);
+
+        Loyalty loyalty = Loyalty.builder()
+                .customer(customer)
+                .points(0)
+                .accumulationNumber(0)
+                .CreateAt(LocalDate.now())
+                .build();
+
+        loyaltyRepository.save(loyalty);
+        customer.setLoyalty(loyalty);
 
         Cart cart = new Cart();
         cart.setCustomer(customer);
@@ -64,8 +83,8 @@ public class CustomerService {
      * Update an existing customer.
      */
     public ApiResponse<CustomerResponse> updateCustomer(Long customerId, CustomerUpdateRequest request) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer =
+                customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
 
         if (request.getFirstName() != null) customer.setFirstName(request.getFirstName());
         if (request.getLastName() != null) customer.setLastName(request.getLastName());
@@ -88,10 +107,8 @@ public class CustomerService {
      * Retrieve all customers.
      */
     public ApiResponse<List<CustomerResponse>> getAllCustomers() {
-        List<CustomerResponse> customers = customerRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        List<CustomerResponse> customers =
+                customerRepository.findAll().stream().map(this::mapToResponse).collect(Collectors.toList());
         return ApiResponse.<List<CustomerResponse>>builder()
                 .message("Fetched all customers successfully")
                 .result(customers)
@@ -102,8 +119,8 @@ public class CustomerService {
      * Retrieve a customer by ID.
      */
     public ApiResponse<CustomerResponse> getCustomerById(Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer =
+                customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
         return ApiResponse.<CustomerResponse>builder()
                 .message("Customer fetched successfully")
                 .result(mapToResponse(customer))
@@ -143,5 +160,23 @@ public class CustomerService {
                 .avatar(customer.getAvatar())
                 .build();
     }
-}
 
+    public Avatar updateAvatar(Long customerId, MultipartFile file) throws IOException {
+        Customer customer =
+                customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        Map uploadResult = cloudinaryService.uploadImage(file);
+        String url = (String) uploadResult.get("url");
+        String cloudinaryId = (String) uploadResult.get("public_id");
+
+        Avatar avatar = Avatar.builder()
+                .name(file.getOriginalFilename())
+                .url(url)
+                .cloudinaryId(cloudinaryId)
+                .data(file.getBytes())
+                .uploadedBy(customer)
+                .build();
+
+        return avatarRepository.save(avatar);
+    }
+}

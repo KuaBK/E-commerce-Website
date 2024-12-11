@@ -1,7 +1,10 @@
 package com.Phong.backend.dto.response.product;
 
-import lombok.*;
 import java.util.List;
+
+import com.Phong.backend.entity.product.ProductImage;
+
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -15,7 +18,8 @@ public class ProductResponse {
     private String origin;
     private String version;
     private String evaluate;
-    private List<String> images;
+    private List<ProductImage> images;
     private Integer stockQuantity;
+    private Integer quantitySold;
     private String categoryName;
 }
