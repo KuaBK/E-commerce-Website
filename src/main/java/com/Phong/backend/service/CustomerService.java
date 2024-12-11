@@ -1,24 +1,26 @@
 package com.Phong.backend.service;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.Phong.backend.dto.request.customer.CustomerCreationRequest;
 import com.Phong.backend.dto.request.customer.CustomerUpdateRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.customer.CustomerResponse;
 import com.Phong.backend.entity.account.Account;
 import com.Phong.backend.entity.cart.Cart;
-import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.entity.customer.Avatar;
+import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.entity.customer.Loyalty;
 import com.Phong.backend.repository.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -31,13 +33,12 @@ public class CustomerService {
     private final AvatarRepository avatarRepository;
     private final LoyaltyRepository loyaltyRepository;
 
-
-
     /**
      * Create a new customer.
      */
     public ApiResponse<CustomerResponse> createCustomer(CustomerCreationRequest request) {
-        Account account = accountRepository.findById(request.getAccountId())
+        Account account = accountRepository
+                .findById(request.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
         Customer customer = Customer.builder()
@@ -82,8 +83,8 @@ public class CustomerService {
      * Update an existing customer.
      */
     public ApiResponse<CustomerResponse> updateCustomer(Long customerId, CustomerUpdateRequest request) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer =
+                customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
 
         if (request.getFirstName() != null) customer.setFirstName(request.getFirstName());
         if (request.getLastName() != null) customer.setLastName(request.getLastName());
@@ -106,10 +107,8 @@ public class CustomerService {
      * Retrieve all customers.
      */
     public ApiResponse<List<CustomerResponse>> getAllCustomers() {
-        List<CustomerResponse> customers = customerRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        List<CustomerResponse> customers =
+                customerRepository.findAll().stream().map(this::mapToResponse).collect(Collectors.toList());
         return ApiResponse.<List<CustomerResponse>>builder()
                 .message("Fetched all customers successfully")
                 .result(customers)
@@ -120,8 +119,8 @@ public class CustomerService {
      * Retrieve a customer by ID.
      */
     public ApiResponse<CustomerResponse> getCustomerById(Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer =
+                customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
         return ApiResponse.<CustomerResponse>builder()
                 .message("Customer fetched successfully")
                 .result(mapToResponse(customer))
@@ -163,8 +162,8 @@ public class CustomerService {
     }
 
     public Avatar updateAvatar(Long customerId, MultipartFile file) throws IOException {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        Customer customer =
+                customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Map uploadResult = cloudinaryService.uploadImage(file);
         String url = (String) uploadResult.get("url");
@@ -180,6 +179,4 @@ public class CustomerService {
 
         return avatarRepository.save(avatar);
     }
-
 }
-

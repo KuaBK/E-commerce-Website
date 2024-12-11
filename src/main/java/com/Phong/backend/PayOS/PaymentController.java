@@ -3,6 +3,9 @@ package com.Phong.backend.PayOS;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.Phong.backend.entity.invoice.*;
 import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.entity.order.OrderDetail;
@@ -10,9 +13,6 @@ import com.Phong.backend.repository.*;
 import com.Phong.backend.service.InvoiceProcessingService;
 import com.Phong.backend.service.LoyaltyService;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -102,7 +102,6 @@ public class PaymentController {
             invoice.setPaymentMethod(PaymentMethod.BANK);
             invoice.setCreatedAt(mapper.convertValue(data.get("createdAt"), Date.class));
 
-
             Order order = orderRepository.findById(orderId).orElse(null);
             invoice.setDeliveryAddress(order.getDeliveryAddress());
             invoice.setOrder(order);
@@ -114,15 +113,17 @@ public class PaymentController {
             invoiceRepository.save(invoice);
 
             Invoice savedInvoice = invoiceRepository.save(invoice);
-            List<InvoiceDetail> invoiceDetails = order.getOrderDetails().stream().map(orderDetail -> {
-                InvoiceDetail detail = new InvoiceDetail();
-                detail.setInvoice(savedInvoice);
-                detail.setProduct(orderDetail.getProduct());
-                detail.setQuantity(orderDetail.getQuantity());
-                detail.setUnitPrice(orderDetail.getPrice());
-                detail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
-                return detail;
-            }).collect(Collectors.toList());
+            List<InvoiceDetail> invoiceDetails = order.getOrderDetails().stream()
+                    .map(orderDetail -> {
+                        InvoiceDetail detail = new InvoiceDetail();
+                        detail.setInvoice(savedInvoice);
+                        detail.setProduct(orderDetail.getProduct());
+                        detail.setQuantity(orderDetail.getQuantity());
+                        detail.setUnitPrice(orderDetail.getPrice());
+                        detail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
+                        return detail;
+                    })
+                    .collect(Collectors.toList());
 
             invoiceDetailRepository.saveAll(invoiceDetails);
 
@@ -132,9 +133,6 @@ public class PaymentController {
             e.printStackTrace();
         }
     }
-
-
-
 
     @PostMapping(path = "/create")
     public ObjectNode createPaymentLink(@RequestParam String orderId) {
@@ -173,7 +171,8 @@ public class PaymentController {
             // Tạo đối tượng ItemData
             ItemData item = ItemData.builder()
                     .name(productNames.toString())
-                    .price((int)(totalAmount + order.getShippingFee() - order.getTotalDiscount() - order.getTotalLoyalty()))
+                    .price((int)
+                            (totalAmount + order.getShippingFee() - order.getTotalDiscount() - order.getTotalLoyalty()))
                     .quantity(totalQuantity)
                     .build();
 
@@ -183,7 +182,8 @@ public class PaymentController {
             PaymentData paymentData = PaymentData.builder()
                     .orderCode(orderCode)
                     .description("OrderCode# " + orderCode)
-                    .amount((int)(totalAmount + order.getShippingFee() - order.getTotalDiscount() - order.getTotalLoyalty()))
+                    .amount((int)
+                            (totalAmount + order.getShippingFee() - order.getTotalDiscount() - order.getTotalLoyalty()))
                     .item(item)
                     .returnUrl(returnUrl)
                     .cancelUrl(cancelUrl)
@@ -222,10 +222,13 @@ public class PaymentController {
             savePayment(response);
 
             JsonNode data = response.get("data");
-            if(data.get("status").asText().equals("PAID")){
+            if (data.get("status").asText().equals("PAID")) {
                 saveInvoice(response, orderId);
-                Invoice invoice = invoiceRepository.findByOrder_OrderId(orderId).orElseThrow(() -> new RuntimeException("Invoice not found"));
-                Order newOrder = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+                Invoice invoice = invoiceRepository
+                        .findByOrder_OrderId(orderId)
+                        .orElseThrow(() -> new RuntimeException("Invoice not found"));
+                Order newOrder =
+                        orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
                 newOrder.setStatus("Completed");
                 String email = newOrder.getCustomer().getEmail();
                 try {
@@ -236,7 +239,9 @@ public class PaymentController {
                 }
                 List<OrderDetail> details = orderDetailRepository.findByOrderOrderId(orderId);
                 for (OrderDetail detail : details) {
-                    detail.getProduct().setQuantitySold(detail.getQuantity() + detail.getProduct().getQuantitySold());
+                    detail.getProduct()
+                            .setQuantitySold(
+                                    detail.getQuantity() + detail.getProduct().getQuantitySold());
                     detail.getProduct().setStockQuantity(detail.getProduct().getStockQuantity() - detail.getQuantity());
                 }
                 loyaltyService.addPoints(invoice.getCustomer().getCustomerId(), invoice.getTotalAmount());

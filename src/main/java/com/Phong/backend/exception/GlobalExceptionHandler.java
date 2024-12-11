@@ -1,10 +1,6 @@
 package com.Phong.backend.exception;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-
-import jakarta.validation.ConstraintViolation;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,21 +42,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
 
-        String errorMessage = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
+        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
                 .findFirst()
                 .map(FieldError::getDefaultMessage)
                 .orElse("Validation error");
 
-        ApiResponse<Void> response = ApiResponse.<Void>builder()
-                .code(400)
-                .message(errorMessage)
-                .build();
+        ApiResponse<Void> response =
+                ApiResponse.<Void>builder().code(400).message(errorMessage).build();
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
-
 
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse> HandlingAccessDeniedException(AccessDeniedException exception) {

@@ -1,18 +1,20 @@
 package com.Phong.backend.entity.customer;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
+import com.Phong.backend.entity.Gender;
 import com.Phong.backend.entity.account.Account;
 import com.Phong.backend.entity.cart.Cart;
 import com.Phong.backend.entity.order.Order;
-import com.Phong.backend.entity.Gender;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter
@@ -21,11 +23,12 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "customer",
+@Table(
+        name = "customer",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"Email"}),
-                @UniqueConstraint(columnNames = {"Phone"}),
-                @UniqueConstraint(columnNames = {"citizenId"})
+            @UniqueConstraint(columnNames = {"Email"}),
+            @UniqueConstraint(columnNames = {"Phone"}),
+            @UniqueConstraint(columnNames = {"citizenId"})
         })
 public class Customer {
     @OneToOne(fetch = FetchType.EAGER)
@@ -65,7 +68,9 @@ public class Customer {
     String email;
 
     @NotBlank(message = "Phone number cannot be blank")
-    @Pattern(regexp = "^(03|05|07|08|09)\\d{8}$", message = "Phone number must be 10 digits and start with a valid prefix (e.g., 03, 05, 07, 08, 09)")
+    @Pattern(
+            regexp = "^(03|05|07|08|09)\\d{8}$",
+            message = "Phone number must be 10 digits and start with a valid prefix (e.g., 03, 05, 07, 08, 09)")
     @Column(name = "Phone", unique = true)
     String phone;
 

@@ -1,8 +1,10 @@
 package com.Phong.backend.entity.order;
 
+import jakarta.persistence.*;
+
 import com.Phong.backend.entity.product.Product;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+
 import lombok.*;
 
 @Entity

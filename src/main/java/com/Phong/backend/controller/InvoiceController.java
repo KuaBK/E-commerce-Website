@@ -1,14 +1,15 @@
 package com.Phong.backend.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.Phong.backend.dto.request.invoice.InvoiceRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.invoice.InvoiceDetailResponse;
 import com.Phong.backend.dto.response.invoice.InvoiceResponse;
 import com.Phong.backend.service.InvoiceService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/invoice")
@@ -59,7 +60,7 @@ public class InvoiceController {
     public ApiResponse<List<InvoiceDetailResponse>> getInvoiceDetails(@PathVariable String invoiceId) {
         List<InvoiceDetailResponse> invoiceDetails = invoiceService.getInvoiceDetailsByInvoiceId(invoiceId);
         return ApiResponse.<List<InvoiceDetailResponse>>builder()
-                .code(1000)  // Mã trạng thái (có thể thay đổi theo yêu cầu)
+                .code(1000) // Mã trạng thái (có thể thay đổi theo yêu cầu)
                 .message("Successfully retrieved invoice details")
                 .result(invoiceDetails)
                 .build();

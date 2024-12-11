@@ -1,21 +1,21 @@
-//package com.Phong.backend.PayOS;
+// package com.Phong.backend.PayOS;
 //
-//import java.util.Date;
+// import java.util.Date;
 //
-//import org.springframework.http.MediaType;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RequestMethod;
+// import org.springframework.http.MediaType;
+// import org.springframework.stereotype.Controller;
+// import org.springframework.web.bind.annotation.RequestMapping;
+// import org.springframework.web.bind.annotation.RequestMethod;
 //
-//import jakarta.servlet.http.HttpServletRequest;
-//import jakarta.servlet.http.HttpServletResponse;
-//import vn.payos.PayOS;
-//import vn.payos.type.CheckoutResponseData;
-//import vn.payos.type.ItemData;
-//import vn.payos.type.PaymentData;
+// import jakarta.servlet.http.HttpServletRequest;
+// import jakarta.servlet.http.HttpServletResponse;
+// import vn.payos.PayOS;
+// import vn.payos.type.CheckoutResponseData;
+// import vn.payos.type.ItemData;
+// import vn.payos.type.PaymentData;
 //
-//@Controller
-//public class CheckoutController {
+// @Controller
+// public class CheckoutController {
 //    private final PayOS payOS;
 //
 //    public CheckoutController(PayOS payOS) {
@@ -38,7 +38,8 @@
 //        return "cancel";
 //    }
 //
-//    @RequestMapping(method = RequestMethod.POST, value = "/create-payment-link", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+//    @RequestMapping(method = RequestMethod.POST, value = "/create-payment-link", consumes =
+// MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 //    public void checkout(HttpServletRequest request, HttpServletResponse httpServletResponse) {
 //        try {
 //            final String baseUrl = getBaseUrl(request);
@@ -51,7 +52,8 @@
 //            String currentTimeString = String.valueOf(new Date().getTime());
 //            long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
 //            ItemData item = ItemData.builder().name(productName).quantity(1).price(price).build();
-//            PaymentData paymentData = PaymentData.builder().orderCode(orderCode).amount(price).description(description)
+//            PaymentData paymentData =
+// PaymentData.builder().orderCode(orderCode).amount(price).description(description)
 //                    .returnUrl(returnUrl).cancelUrl(cancelUrl).item(item).build();
 //            CheckoutResponseData data = payOS.createPaymentLink(paymentData);
 //
@@ -77,4 +79,4 @@
 //        url += contextPath;
 //        return url;
 //    }
-//}
+// }

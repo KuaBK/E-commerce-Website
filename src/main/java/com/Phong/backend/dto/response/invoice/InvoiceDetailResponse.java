@@ -1,6 +1,5 @@
 package com.Phong.backend.dto.response.invoice;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +17,8 @@ public class InvoiceDetailResponse {
 
     public static InvoiceDetailResponse fromEntity(com.Phong.backend.entity.invoice.InvoiceDetail detail) {
         return InvoiceDetailResponse.builder()
-                .productName(detail.getProduct().getName())  // Giả sử bạn có phương thức getProduct() trong InvoiceDetail
+                .productName(
+                        detail.getProduct().getName()) // Giả sử bạn có phương thức getProduct() trong InvoiceDetail
                 .quantity(detail.getQuantity())
                 .unitPrice(detail.getUnitPrice())
                 .totalPrice(detail.getTotalPrice())

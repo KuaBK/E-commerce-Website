@@ -1,16 +1,17 @@
 package com.Phong.backend.service;
 
-import com.Phong.backend.entity.customer.Customer;
-import com.Phong.backend.entity.customer.Loyalty;
-import com.Phong.backend.repository.CustomerRepository;
-import com.Phong.backend.repository.LoyaltyRepository;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
+import com.Phong.backend.entity.customer.Customer;
+import com.Phong.backend.entity.customer.Loyalty;
+import com.Phong.backend.repository.CustomerRepository;
+import com.Phong.backend.repository.LoyaltyRepository;
 
 @Service
 public class LoyaltyScheduler {
@@ -34,4 +35,3 @@ public class LoyaltyScheduler {
         }
     }
 }
-

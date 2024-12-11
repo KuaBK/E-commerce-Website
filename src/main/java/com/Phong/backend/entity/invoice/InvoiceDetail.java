@@ -1,9 +1,10 @@
 package com.Phong.backend.entity.invoice;
 
-import com.Phong.backend.entity.product.Product;
 import jakarta.persistence.*;
-import lombok.*;
 
+import com.Phong.backend.entity.product.Product;
+
+import lombok.*;
 
 @Entity
 @Data

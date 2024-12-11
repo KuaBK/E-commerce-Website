@@ -1,19 +1,20 @@
 package com.Phong.backend.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.Phong.backend.dto.request.order.OrderRequest;
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.order.OrderResponse;
 import com.Phong.backend.entity.order.Order;
 import com.Phong.backend.service.OrderService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/order")
@@ -28,11 +29,7 @@ public class OrderController {
     public ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request) {
         try {
             Order order = orderService.createOrderFromCart(
-                    request.getCustomerId(),
-                    request.getAddressId(),
-                    request.getCartItems(),
-                    request.isUseLoyalty()
-            );
+                    request.getCustomerId(), request.getAddressId(), request.getCartItems(), request.isUseLoyalty());
 
             return ApiResponse.<OrderResponse>builder()
                     .message("Order created successfully")

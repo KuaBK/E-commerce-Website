@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class OrderResponse {
-    private String orderId;      // ID của đơn hàng
+    private String orderId; // ID của đơn hàng
     private String status;
     private String orderDate;
     private Double totalPrice;
@@ -17,4 +17,3 @@ public class OrderResponse {
     private Double shippingFee;
     private Double totalAmount;
 }
-

@@ -1,7 +1,8 @@
 package com.Phong.backend.service;
 
-import com.Phong.backend.entity.product.Product;
 import org.springframework.data.jpa.domain.Specification;
+
+import com.Phong.backend.entity.product.Product;
 
 public class ProductSpecification {
 

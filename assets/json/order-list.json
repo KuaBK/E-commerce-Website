@@ -1,0 +1,114 @@
+{
+  "data": [
+    {
+      "total_price": 53497000,
+      "shipping_fee": 30000,
+      "order_id": 1,
+      "order_date": "2024-01-01",
+      "total_amount": 53497000,
+      "delivery_date": "2024-01-05",
+      "address_id": 1,
+      "status": "Cancelled"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 2,
+      "order_date": "2024-01-10",
+      "total_amount": 200000,
+      "delivery_date": "2024-01-15",
+      "address_id": 1,
+      "status": "Completed"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 3,
+      "order_date": "2024-02-15",
+      "total_amount": 750000,
+      "delivery_date": "2024-02-20",
+      "address_id": 1,
+      "status": "Not Started"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 4,
+      "order_date": "2024-03-05",
+      "total_amount": 300000,
+      "delivery_date": "2024-03-10",
+      "address_id": 1,
+      "status": "In Progress"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 5,
+      "order_date": "2024-03-20",
+      "total_amount": 150000,
+      "delivery_date": "2024-03-25",
+      "address_id": 1,
+      "status": "Completed"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 6,
+      "order_date": "2024-04-01",
+      "total_amount": 900000,
+      "delivery_date": "2024-04-05",
+      "address_id": 1,
+      "status": "Not Started"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 7,
+      "order_date": "2024-04-15",
+      "total_amount": 700000,
+      "delivery_date": "2024-04-20",
+      "address_id": 1,
+      "status": "In Progress"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 8,
+      "order_date": "2024-05-01",
+      "total_amount": 550000,
+      "delivery_date": "2024-05-05",
+      "address_id": 1,
+      "status": "Completed"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 9,
+      "order_date": "2024-05-20",
+      "total_amount": 400000,
+      "delivery_date": "2024-05-25",
+      "address_id": 1,
+      "status": "In Progress"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 10,
+      "order_date": "2024-06-01",
+      "total_amount": 650000,
+      "delivery_date": "2024-06-05",
+      "address_id": 1,
+      "status": "Not Started"
+    },
+    {
+      "total_price": 100000,
+      "shipping_fee": 30000,
+      "order_id": 11,
+      "order_date": "2024-06-15",
+      "total_amount": 850000,
+      "delivery_date": "2024-06-20",
+      "address_id": 1,
+      "status": "Completed"
+    }
+  ]
+}

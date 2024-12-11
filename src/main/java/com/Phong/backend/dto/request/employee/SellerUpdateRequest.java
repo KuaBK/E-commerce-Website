@@ -1,13 +1,12 @@
 package com.Phong.backend.dto.request.employee;
 
-import jakarta.validation.constraints.Email;
-
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 
 @Data
 @Builder

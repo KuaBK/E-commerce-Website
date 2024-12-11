@@ -1,22 +1,24 @@
 package com.Phong.backend.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.Cart.CartItemResponse;
 import com.Phong.backend.entity.cart.Cart;
 import com.Phong.backend.entity.cart.CartItem;
-import com.Phong.backend.entity.product.Product;
 import com.Phong.backend.entity.customer.Customer;
-import com.Phong.backend.repository.CartRepository;
+import com.Phong.backend.entity.product.Product;
 import com.Phong.backend.repository.CartItemRepository;
-import com.Phong.backend.repository.ProductRepository;
+import com.Phong.backend.repository.CartRepository;
 import com.Phong.backend.repository.CustomerRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.Phong.backend.repository.ProductRepository;
 
 @Service
 public class CartService {
@@ -62,7 +64,6 @@ public class CartService {
 
         Product product = productOpt.get();
 
-
         // Lấy giỏ hàng của khách hàng
         Optional<Cart> cartOpt = cartRepository.findByCustomer_CustomerId(customer.getCustomerId());
         Cart cart;
@@ -94,9 +95,8 @@ public class CartService {
         }
 
         // Tính lại tổng giá trị giỏ hàng
-        double totalPrice = cart.getItems().stream()
-                .mapToDouble(CartItem::getTotalPrice)
-                .sum();
+        double totalPrice =
+                cart.getItems().stream().mapToDouble(CartItem::getTotalPrice).sum();
         cart.setTotalPrice(totalPrice);
 
         cartRepository.save(cart); // Lưu giỏ hàng
@@ -144,12 +144,10 @@ public class CartService {
      * Lấy tất cả sản phẩm trong giỏ hàng.
      */
     public ApiResponse<List<CartItemResponse>> getAllProductsInCart(Long customerId) {
-        Cart cart = cartRepository.findByCustomer_CustomerId(customerId)
-                .orElse(null);
+        Cart cart = cartRepository.findByCustomer_CustomerId(customerId).orElse(null);
         if (cart != null) {
-            List<CartItemResponse> cartItems = cart.getItems().stream()
-                    .map(this::mapToCartItemResponse)
-                    .collect(Collectors.toList());
+            List<CartItemResponse> cartItems =
+                    cart.getItems().stream().map(this::mapToCartItemResponse).collect(Collectors.toList());
 
             return ApiResponse.<List<CartItemResponse>>builder()
                     .message("Products retrieved successfully")
@@ -202,9 +200,8 @@ public class CartService {
         cartItemRepository.save(cartItem);
 
         // Tính lại tổng giá trị giỏ hàng
-        double totalPrice = cart.getItems().stream()
-                .mapToDouble(CartItem::getTotalPrice)
-                .sum();
+        double totalPrice =
+                cart.getItems().stream().mapToDouble(CartItem::getTotalPrice).sum();
         cart.setTotalPrice(totalPrice);
         cartRepository.save(cart);
 

@@ -1,14 +1,16 @@
 package com.Phong.backend.entity.invoice;
 
+import java.util.Date;
+import java.util.List;
+
+import jakarta.persistence.*;
+
 import com.Phong.backend.entity.customer.Address;
 import com.Phong.backend.entity.customer.Customer;
 import com.Phong.backend.entity.order.Order;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import lombok.*;
 
-import java.util.Date;
-import java.util.List;
+import lombok.*;
 
 @Entity
 @Data
@@ -57,5 +59,4 @@ public class Invoice {
     private double totalPrice;
     private double shippingFee;
     private double totalAmount;
-
 }

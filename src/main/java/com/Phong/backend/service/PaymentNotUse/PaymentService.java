@@ -1,23 +1,23 @@
-//package com.Phong.backend.service;
+// package com.Phong.backend.service;
 //
-//import com.Phong.backend.dto.request.Payment.CallbackRequest;
-//import com.Phong.backend.entity.order.Order;
-//import com.Phong.backend.repository.OrderRepository;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.boot.web.client.RestTemplateBuilder;
-//import org.springframework.http.HttpEntity;
-//import org.springframework.http.HttpHeaders;
-//import org.springframework.http.HttpMethod;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.stereotype.Service;
-//import org.springframework.web.client.RestTemplate;
+// import com.Phong.backend.dto.request.Payment.CallbackRequest;
+// import com.Phong.backend.entity.order.Order;
+// import com.Phong.backend.repository.OrderRepository;
+// import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.boot.web.client.RestTemplateBuilder;
+// import org.springframework.http.HttpEntity;
+// import org.springframework.http.HttpHeaders;
+// import org.springframework.http.HttpMethod;
+// import org.springframework.http.ResponseEntity;
+// import org.springframework.stereotype.Service;
+// import org.springframework.web.client.RestTemplate;
 //
-//import java.util.HashMap;
-//import java.util.Map;
+// import java.util.HashMap;
+// import java.util.Map;
 //
 //
-//@Service
-//public class PaymentService {
+// @Service
+// public class PaymentService {
 //
 //    private final OrderRepository orderRepository;
 //    private final RestTemplate restTemplate;
@@ -53,4 +53,4 @@
 //
 //        return quickLink.toString();
 //    }
-//}
+// }

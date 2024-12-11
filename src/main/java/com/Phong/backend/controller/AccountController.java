@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -96,9 +97,7 @@ public class AccountController {
                     .build();
             return new ResponseEntity<>(response, HttpStatus.OK);
         } else {
-            response = ApiResponse.<Void>builder()
-                    .message("Account not found")
-                    .build();
+            response = ApiResponse.<Void>builder().message("Account not found").build();
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

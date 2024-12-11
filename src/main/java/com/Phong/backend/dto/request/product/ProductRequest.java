@@ -1,8 +1,10 @@
 package com.Phong.backend.dto.request.product;
 
-import com.Phong.backend.entity.product.ProductImage;
-import lombok.*;
 import java.util.List;
+
+import com.Phong.backend.entity.product.ProductImage;
+
+import lombok.*;
 
 @Data
 @NoArgsConstructor

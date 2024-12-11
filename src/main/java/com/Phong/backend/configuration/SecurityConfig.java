@@ -19,32 +19,49 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
-        "/auth/login", "/auth/introspect", "/auth/logout", "/auth/refresh",
-
-        "/account/myInfo", "/account", "/account/{id}",
-
-        "/salesperson", "/salesperson/{id}",
-
-        "/customers", "/customers/{customerId}", "/customers/avatar/{customerId}",
-
-        "/products", "/products/{productId}", "/products/category/{categoryId}", "/products/all", "/products/{productId}/category/{categoryId}",
-        "/products/{productId}/category", "/products/search", "/products/{productId}/images", "/products/filter",
-
-        "/categories", "/categories/{categoryId}",
-
-        "/cart/add", "/cart/remove", "/cart/allItems", "/cart/quantity",
-
-        "/order/create", "/order/all", "/order/details", "/order/cancel",
-
-        "/address", "/address/{id}",
-
-        "/invoice", "/invoice/{id}", "/invoice/{id}/cancel", "/invoice/{invoiceId}/details",
-
-        "/payment/create", "/payment",
-
+        "/auth/login",
+        "/auth/introspect",
+        "/auth/logout",
+        "/auth/refresh",
+        "/account/myInfo",
+        "/account",
+        "/account/{id}",
+        "/salesperson",
+        "/salesperson/{id}",
+        "/customers",
+        "/customers/{customerId}",
+        "/customers/avatar/{customerId}",
+        "/products",
+        "/products/{productId}",
+        "/products/category/{categoryId}",
+        "/products/all",
+        "/products/{productId}/category/{categoryId}",
+        "/products/{productId}/category",
+        "/products/search",
+        "/products/{productId}/images",
+        "/products/filter",
+        "/categories",
+        "/categories/{categoryId}",
+        "/cart/add",
+        "/cart/remove",
+        "/cart/allItems",
+        "/cart/quantity",
+        "/order/create",
+        "/order/all",
+        "/order/details",
+        "/order/cancel",
+        "/address",
+        "/address/{id}",
+        "/invoice",
+        "/invoice/{id}",
+        "/invoice/{id}/cancel",
+        "/invoice/{invoiceId}/details",
+        "/payment/create",
+        "/payment",
         "/images/upload",
-
-        "/discounts", "/discounts/{discountId}", "/discounts/product/{productId}"
+        "/discounts",
+        "/discounts/{discountId}",
+        "/discounts/product/{productId}"
     };
 
     private final CustomJwtDecoder customJwtDecoder;

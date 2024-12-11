@@ -1,22 +1,24 @@
 package com.Phong.backend.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.Phong.backend.dto.request.employee.SellerCreationRequest;
 import com.Phong.backend.dto.request.employee.SellerUpdateRequest;
 import com.Phong.backend.dto.response.employee.SellerResponse;
+import com.Phong.backend.entity.Gender;
 import com.Phong.backend.entity.account.Account;
 import com.Phong.backend.entity.employee.Seller;
-import com.Phong.backend.entity.Gender;
 import com.Phong.backend.repository.AccountRepository;
 import com.Phong.backend.repository.SalesPersonRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,10 +28,10 @@ public class SalesPersonService {
     private final SalesPersonRepository personRepository;
     private final AccountRepository accountRepository;
 
-
     // Create Personnel
     public SellerResponse createPersonnel(SellerCreationRequest request) {
-        Account account = accountRepository.findById(request.getAccountId())
+        Account account = accountRepository
+                .findById(request.getAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("Account not found"));
 
         Seller salesPerson = Seller.builder()
@@ -60,14 +62,13 @@ public class SalesPersonService {
 
     // Get Personnel by ID
     public Optional<SellerResponse> getPersonnelById(Long id) {
-        return personRepository.findById(id)
-                .map(this::mapToPersonnelResponse);
+        return personRepository.findById(id).map(this::mapToPersonnelResponse);
     }
 
     // Update Personnel
     public SellerResponse updatePersonnel(Long id, SellerUpdateRequest request) {
-        Seller personnel = personRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Personnel not found"));
+        Seller personnel =
+                personRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Personnel not found"));
 
         if (request.getFirstName() != null) personnel.setFirstName(request.getFirstName());
         if (request.getLastName() != null) personnel.setLastName(request.getLastName());
@@ -78,7 +79,8 @@ public class SalesPersonService {
         if (request.getBirthday() != null) personnel.setBirthday(request.getBirthday());
         if (request.getStartWorkingDate() != null) personnel.setStartWorkingDate(request.getStartWorkingDate());
         if (request.getCitizenId() != null) personnel.setCitizenId(request.getCitizenId());
-        if (request.getSex() != null) personnel.setGender(Gender.valueOf(request.getSex().toUpperCase()));
+        if (request.getSex() != null)
+            personnel.setGender(Gender.valueOf(request.getSex().toUpperCase()));
 
         Seller updatedPersonnel = personRepository.save(personnel);
         return mapToPersonnelResponse(updatedPersonnel);

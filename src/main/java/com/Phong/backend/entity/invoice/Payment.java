@@ -1,9 +1,10 @@
 package com.Phong.backend.entity.invoice;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.util.Date;
+
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Data
@@ -20,5 +21,4 @@ public class Payment {
     private Date createdAt;
 
     private String status;
-
 }

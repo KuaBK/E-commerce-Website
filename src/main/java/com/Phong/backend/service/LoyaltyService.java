@@ -1,13 +1,15 @@
 package com.Phong.backend.service;
 
+import java.time.LocalDate;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.Phong.backend.dto.response.ApiResponse;
 import com.Phong.backend.dto.response.customer.LoyaltyResponse;
 import com.Phong.backend.entity.customer.Loyalty;
 import com.Phong.backend.repository.CustomerRepository;
 import com.Phong.backend.repository.LoyaltyRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import java.time.LocalDate;
 
 @Service
 public class LoyaltyService {
@@ -23,7 +25,9 @@ public class LoyaltyService {
 
         if (loyalty == null) {
             loyalty = Loyalty.builder()
-                    .customer(customerRepository.findById(customerId).orElseThrow(() -> new RuntimeException("Customer not found")))
+                    .customer(customerRepository
+                            .findById(customerId)
+                            .orElseThrow(() -> new RuntimeException("Customer not found")))
                     .points(0)
                     .accumulationNumber(0)
                     .CreateAt(LocalDate.now())
@@ -36,7 +40,6 @@ public class LoyaltyService {
         loyaltyRepository.save(loyalty);
     }
 
-
     public ApiResponse<LoyaltyResponse> getLoyaltyInfo(Long customerId) {
         Loyalty loyalty = loyaltyRepository.findByCustomer_CustomerId(customerId);
         if (loyalty == null) {
@@ -48,8 +51,7 @@ public class LoyaltyService {
                 loyalty.getLoyaltyId(),
                 loyalty.getCustomer().getCustomerId(),
                 loyalty.getPoints(),
-                loyalty.getAccumulationNumber()
-        );
+                loyalty.getAccumulationNumber());
 
         return new ApiResponse<>(1000, "Loyalty information retrieved successfully", loyaltydto);
     }

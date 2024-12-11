@@ -1,7 +1,8 @@
 package com.Phong.backend.service;
 
-import com.Phong.backend.entity.invoice.Invoice;
 import org.springframework.stereotype.Service;
+
+import com.Phong.backend.entity.invoice.Invoice;
 
 @Service
 public class InvoiceProcessingService {
@@ -26,7 +27,6 @@ public class InvoiceProcessingService {
                 userEmail,
                 "Your Invoice #" + invoice.getId(),
                 "Thank you for your purchase. Please find your invoice attached.",
-                pdfPath
-        );
+                pdfPath);
     }
 }

@@ -1,5 +1,12 @@
 package com.Phong.backend.service;
 
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.Phong.backend.dto.request.invoice.InvoiceRequest;
 import com.Phong.backend.dto.response.invoice.InvoiceDetailResponse;
 import com.Phong.backend.dto.response.invoice.InvoiceResponse;
@@ -13,12 +20,6 @@ import com.Phong.backend.repository.InvoiceDetailRepository;
 import com.Phong.backend.repository.InvoiceRepository;
 import com.Phong.backend.repository.OrderDetailRepository;
 import com.Phong.backend.repository.OrderRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class InvoiceService {
@@ -30,12 +31,13 @@ public class InvoiceService {
     private final OrderDetailRepository orderDetailRepository;
     private final LoyaltyService loyaltyService;
 
-    public InvoiceService(InvoiceRepository invoiceRepository,
-                          InvoiceDetailRepository invoiceDetailRepository,
-                          OrderRepository orderRepository,
-                          InvoiceProcessingService invoiceProcessingService,
-                          OrderDetailRepository orderDetailRepository,
-                          LoyaltyService loyaltyService) {
+    public InvoiceService(
+            InvoiceRepository invoiceRepository,
+            InvoiceDetailRepository invoiceDetailRepository,
+            OrderRepository orderRepository,
+            InvoiceProcessingService invoiceProcessingService,
+            OrderDetailRepository orderDetailRepository,
+            LoyaltyService loyaltyService) {
         this.invoiceRepository = invoiceRepository;
         this.invoiceDetailRepository = invoiceDetailRepository;
         this.orderRepository = orderRepository;
@@ -46,7 +48,8 @@ public class InvoiceService {
 
     @Transactional
     public InvoiceResponse createInvoice(InvoiceRequest requestDTO) {
-        Order order = orderRepository.findById(requestDTO.getOrderId())
+        Order order = orderRepository
+                .findById(requestDTO.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         order.setStatus("In Progress");
@@ -67,21 +70,25 @@ public class InvoiceService {
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
         // Tạo chi tiết hóa đơn
-        List<InvoiceDetail> invoiceDetails = order.getOrderDetails().stream().map(orderDetail -> {
-            InvoiceDetail detail = new InvoiceDetail();
-            detail.setInvoice(savedInvoice);
-            detail.setProduct(orderDetail.getProduct());
-            detail.setQuantity(orderDetail.getQuantity());
-            detail.setUnitPrice(orderDetail.getPrice());
-            detail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
-            return detail;
-        }).collect(Collectors.toList());
+        List<InvoiceDetail> invoiceDetails = order.getOrderDetails().stream()
+                .map(orderDetail -> {
+                    InvoiceDetail detail = new InvoiceDetail();
+                    detail.setInvoice(savedInvoice);
+                    detail.setProduct(orderDetail.getProduct());
+                    detail.setQuantity(orderDetail.getQuantity());
+                    detail.setUnitPrice(orderDetail.getPrice());
+                    detail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
+                    return detail;
+                })
+                .collect(Collectors.toList());
 
         invoiceDetailRepository.saveAll(invoiceDetails);
 
-        List<OrderDetail> details = orderDetailRepository.findByOrderOrderId(invoice.getOrder().getOrderId());
+        List<OrderDetail> details =
+                orderDetailRepository.findByOrderOrderId(invoice.getOrder().getOrderId());
         for (OrderDetail detail : details) {
-            detail.getProduct().setQuantitySold(detail.getQuantity() + detail.getProduct().getQuantitySold());
+            detail.getProduct()
+                    .setQuantitySold(detail.getQuantity() + detail.getProduct().getQuantitySold());
             detail.getProduct().setStockQuantity(detail.getProduct().getStockQuantity() - detail.getQuantity());
         }
 
@@ -110,10 +117,8 @@ public class InvoiceService {
                 .build();
     }
 
-
     public InvoiceResponse getInvoiceById(String id) {
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+        Invoice invoice = invoiceRepository.findById(id).orElseThrow(() -> new RuntimeException("Invoice not found"));
 
         return InvoiceResponse.builder()
                 .invoiceId(invoice.getId())
@@ -131,15 +136,14 @@ public class InvoiceService {
     }
 
     public void cancelInvoice(String id) {
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+        Invoice invoice = invoiceRepository.findById(id).orElseThrow(() -> new RuntimeException("Invoice not found"));
         invoice.setStatus(InvoiceStatus.CANCELLED);
         invoiceRepository.save(invoice);
     }
 
     public List<InvoiceDetailResponse> getInvoiceDetailsByInvoiceId(String invoiceId) {
         return invoiceDetailRepository.findByInvoice_Id(invoiceId).stream()
-                .map(InvoiceDetailResponse::fromEntity)  // Chuyển từ entity sang DTO
+                .map(InvoiceDetailResponse::fromEntity) // Chuyển từ entity sang DTO
                 .collect(Collectors.toList());
     }
 

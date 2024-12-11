@@ -1,14 +1,15 @@
 package com.Phong.backend.service;
 
+import java.io.File;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
 
 @Service
 public class EmailService {
@@ -20,7 +21,8 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    public void sendEmail(String to, String subject, String content, String additionalArgument) throws MessagingException {
+    public void sendEmail(String to, String subject, String content, String additionalArgument)
+            throws MessagingException {
         // Xử lý logic liên quan đến `additionalArgument` (nếu cần)
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -41,5 +43,3 @@ public class EmailService {
         }
     }
 }
-
-
