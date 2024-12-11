@@ -236,7 +236,7 @@ public class PaymentController {
                 }
                 List<OrderDetail> details = orderDetailRepository.findByOrderOrderId(orderId);
                 for (OrderDetail detail : details) {
-                    detail.getProduct().setQuantitySold(detail.getQuantity());
+                    detail.getProduct().setQuantitySold(detail.getQuantity() + detail.getProduct().getQuantitySold());
                     detail.getProduct().setStockQuantity(detail.getProduct().getStockQuantity() - detail.getQuantity());
                 }
                 loyaltyService.addPoints(invoice.getCustomer().getCustomerId(), invoice.getTotalAmount());

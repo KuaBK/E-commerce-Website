@@ -81,7 +81,7 @@ public class InvoiceService {
 
         List<OrderDetail> details = orderDetailRepository.findByOrderOrderId(invoice.getOrder().getOrderId());
         for (OrderDetail detail : details) {
-            detail.getProduct().setQuantitySold(detail.getQuantity());
+            detail.getProduct().setQuantitySold(detail.getQuantity() + detail.getProduct().getQuantitySold());
             detail.getProduct().setStockQuantity(detail.getProduct().getStockQuantity() - detail.getQuantity());
         }
 
