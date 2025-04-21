@@ -53,32 +53,32 @@ function addToCart(element) {
         productDiv.className = "col-md";
         productDiv.innerHTML = `
         <div class="card card-action mb-4" style="height: 100%">
-        <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-                    <div class="carousel-indicators">
-                      <button
-                        type="button"
-                        data-bs-target="#carouselExample"
-                        data-bs-slide-to="0"
-                        class="active"
-                        aria-current="true"
-                        aria-label="Slide 1"></button>
-                      <button
-                        type="button"
-                        data-bs-target="#carouselExample"
-                        data-bs-slide-to="1"
-                        aria-label="Slide 2"></button>
-                      <button
-                        type="button"
-                        data-bs-target="#carouselExample"
-                        data-bs-slide-to="2"
-                        aria-label="Slide 3"></button>
-                    </div>
-                    <div class="carousel-inner">
-                      ${image.map(function(img, index) {
-                        return `
-                          <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                            <img class="d-block w-100" src="${img}" alt="Slide ${index + 1}" />
-                          </div>
+          <div id="carouselExample-${product.productId}" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+              <button
+                type="button"
+                data-bs-target="#carouselExample-${product.productId}"
+                data-bs-slide-to="0"
+                class="active"
+                aria-current="true"
+                aria-label="Slide 1"></button>
+              <button
+                type="button"
+                data-bs-target="#carouselExample-${product.productId}"
+                data-bs-slide-to="1"
+                aria-label="Slide 2"></button>
+              <button
+                type="button"
+                data-bs-target="#carouselExample-${product.productId}"
+                data-bs-slide-to="2"
+                aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+        ${image.map(function(img, index) {
+          return `
+            <div class="carousel-item ${index === 0 ? 'active' : ''}">
+              <img class="d-block w-100" src="${img}" alt="Slide ${index + 1}" style="height: 250px;"/>
+            </div>
                         `;
                       }).join('')}
                     </div>

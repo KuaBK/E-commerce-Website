@@ -56,6 +56,7 @@ setTimeout(function () {
       });
       $(".total-price").html(totalPrice.toLocaleString("vi-VN") + " VNĐ");
       var price_been_discount = totalPrice - parseInt(discount);
+
       $(".total-all").html(
         price_been_discount.toLocaleString("vi-VN") + " VNĐ"
       );
@@ -678,10 +679,9 @@ $(function () {
     var paypay = pay_origin;
     var shipPrice = 0;
     if ($(this).attr("id") === "customRadioDelivery1") {
-      shipPrice = 0;
-      var shipPriceFree = '<span class="badge bg-label-success">Free</span>';
-      $(".total-ship").html(shipPriceFree);
-      ngaySauNNgay = new Date(ngayHienTai.getTime() + 7 * 24 * 60 * 60 * 1000);
+      shipPrice = 25000;
+      $(".total-ship").html(shipPrice.toLocaleString("vi-VN") + " VNĐ");
+      ngaySauNNgay = new Date(ngayHienTai.getTime() + 1 * 24 * 60 * 60 * 1000);
     } else if ($(this).attr("id") === "customRadioDelivery2") {
       shipPrice = 25000;
       $(".total-ship").html(shipPrice.toLocaleString("vi-VN") + " VNĐ");

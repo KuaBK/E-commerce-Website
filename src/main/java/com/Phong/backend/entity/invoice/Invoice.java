@@ -32,7 +32,7 @@ public class Invoice {
     private Customer customer;
 
     @Column(nullable = false, updatable = false)
-    private String sellerName = "IT HOSPITAL";
+    private String sellerName = "FPS SHOP";
 
     @Column(nullable = false, updatable = false)
     private String sellerAddress = "HCMUT";
@@ -41,7 +41,7 @@ public class Invoice {
     private String sellerPhone = "0944102246";
 
     @Column(nullable = true, updatable = false)
-    private String website = "IT HOSPITAL";
+    private String website = "FPS SHOP";
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     @JsonIgnore
